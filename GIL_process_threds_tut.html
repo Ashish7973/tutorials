@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GIL Explained - Python Threading & Multiprocessing</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --secondary: #1e40af;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark-bg: #0f172a;
+            --light-bg: #1e293b;
+            --card-bg: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --border: #475569;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #1a293e 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        nav {
+            position: sticky;
+            top: 0;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            z-index: 100;
+            padding: 1rem 0;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .nav-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #3b82f6, #60a5fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            cursor: pointer;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 4rem 0;
+            margin-bottom: 3rem;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .hero .tagline {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        /* Card Styles */
+        .card {
+            background: linear-gradient(135deg, rgba(51, 65, 85, 0.5) 0%, rgba(30, 41, 59, 0.5) 100%);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.15);
+        }
+
+        .card h2 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+        }
+
+        .card h3 {
+            color: var(--primary);
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 1rem;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: 2px solid var(--border);
+            color: var(--text-secondary);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .tab-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Definitions */
+        .definition {
+            background: rgba(37, 99, 235, 0.1);
+            border-left: 4px solid var(--primary);
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 6px;
+        }
+
+        .definition strong {
+            color: var(--primary);
+        }
+
+        /* Comparison Table */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .comparison-table th {
+            background: rgba(37, 99, 235, 0.2);
+            color: var(--primary);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .comparison-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .badge-good {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .badge-bad {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        /* Code Block */
+        .code-block {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+
+        .code-block code {
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* Visualization */
+        .visualization {
+            display: grid;
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .vis-item {
+            background: rgba(30, 41, 59, 0.5);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .vis-item h4 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .thread-box {
+            display: inline-block;
+            background: rgba(59, 130, 246, 0.2);
+            border: 2px solid var(--primary);
+            padding: 1rem;
+            margin: 0.5rem;
+            border-radius: 6px;
+            min-width: 100px;
+        }
+
+        .process-box {
+            display: inline-block;
+            background: rgba(16, 185, 129, 0.2);
+            border: 2px solid var(--success);
+            padding: 1rem;
+            margin: 0.5rem;
+            border-radius: 6px;
+            min-width: 100px;
+        }
+
+        .gil-lock {
+            display: inline-block;
+            background: rgba(239, 68, 68, 0.2);
+            border: 2px solid var(--danger);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 6px;
+            color: var(--danger);
+            font-weight: bold;
+        }
+
+        /* Interactive Demo */
+        .demo-section {
+            background: rgba(51, 65, 85, 0.5);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .demo-title {
+            color: var(--primary);
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+
+        button:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .output {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+            min-height: 150px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            max-height: 300px;
+        }
+
+        .output-line {
+            margin: 0.5rem 0;
+        }
+
+        .output-info {
+            color: var(--primary);
+        }
+
+        .output-success {
+            color: var(--success);
+        }
+
+        .output-warning {
+            color: var(--warning);
+        }
+
+        .output-error {
+            color: var(--danger);
+        }
+
+        /* Grid Layout */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        /* Highlight */
+        .highlight {
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 4px solid var(--warning);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+            color: var(--text-secondary);
+        }
+
+        /* Key Points */
+        .key-points {
+            background: rgba(37, 99, 235, 0.05);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .key-points h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .key-points ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .key-points li {
+            padding: 0.5rem 0;
+            padding-left: 2rem;
+            position: relative;
+            color: var(--text-secondary);
+        }
+
+        .key-points li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 3rem 0;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border);
+            margin-top: 4rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+
+            .nav-links {
+                gap: 1rem;
+                font-size: 0.9rem;
+            }
+
+            .comparison-table {
+                font-size: 0.85rem;
+            }
+
+            .comparison-table th,
+            .comparison-table td {
+                padding: 0.75rem;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                gap: 0.5rem;
+            }
+
+            .tab-btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Animation */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .pulse {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--primary);
+        }
+
+        .timeline-item {
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -28px;
+            top: 0;
+            width: 12px;
+            height: 12px;
+            background: var(--primary);
+            border-radius: 50%;
+            border: 3px solid var(--dark-bg);
+        }
+
+        .timeline-item strong {
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <div class="nav-title">🐍 GIL Explained</div>
+            <ul class="nav-links">
+                <li><a href="#basics">Basics</a></li>
+                <li><a href="#hierarchy">Hierarchy</a></li>
+                <li><a href="#gil">GIL</a></li>
+                <li><a href="#comparison">Compare</a></li>
+                <li><a href="#demo">Demo</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Hero -->
+        <section class="hero">
+            <h1>Understanding Python's GIL</h1>
+            <p class="tagline">Master Threads, Processes, Programs & The Global Interpreter Lock</p>
+        </section>
+
+        <!-- Basics Section -->
+        <section id="basics" class="card">
+            <h2>🎯 Basics: Program, Process & Thread</h2>
+            
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab(event, 'program')">Program</button>
+                <button class="tab-btn" onclick="switchTab(event, 'process')">Process</button>
+                <button class="tab-btn" onclick="switchTab(event, 'thread')">Thread</button>
+            </div>
+
+            <!-- Program Tab -->
+            <div id="program" class="tab-content active">
+                <div class="definition">
+                    <strong>Program:</strong> A collection of instructions written in a programming language. It's a <strong>static entity</strong> - just code on disk, not running.
+                </div>
+
+                <h3>Example:</h3>
+                <div class="code-block"><pre><code>
+                    # my_script.py (This is a program)
+                    def greet(name):
+                        print(f"Hello, {name}!")
+
+                    greet("Alice")
+                </code></pre></div>
+
+                <p>The file <code>my_script.py</code> is a program. It doesn't do anything until you run it.</p>
+
+                <div class="highlight">
+                    <strong>Key Point:</strong> A program is passive - it's just instructions. Nothing happens until it's executed.
+                </div>
+            </div>
+
+            <!-- Process Tab -->
+            <div id="process" class="tab-content">
+                <div class="definition">
+                    <strong>Process:</strong> A running instance of a program. It has its own <strong>independent memory space, resources, and Python interpreter</strong>. Multiple processes from the same program run in isolation.
+                </div>
+
+                <h3>Example:</h3>
+                <div class="code-block"><pre><code>
+                    import os
+                    import multiprocessing
+
+                    def worker():
+                        print(f"Process ID: {os.getpid()}")
+
+                    if __name__ == '__main__':
+                        p1 = multiprocessing.Process(target=worker)
+                        p2 = multiprocessing.Process(target=worker)
+                        p1.start()
+                        p2.start()
+                        
+                    # Output: Two different Process IDs!
+                    # Each has its own Python interpreter
+                </code></pre></div>
+
+                <p>Each process has its own:</p>
+                <ul style="margin-left: 2rem; margin-top: 1rem;">
+                    <li>Memory space (variables, objects)</li>
+                    <li>Python interpreter</li>
+                    <li>Resources (files, network connections)</li>
+                    <li>Process ID (PID)</li>
+                </ul>
+
+                <div class="highlight">
+                    <strong>Key Point:</strong> Multiple processes = Multiple Python interpreters running independently. <strong>No GIL between processes!</strong>
+                </div>
+            </div>
+
+            <!-- Thread Tab -->
+            <div id="thread" class="tab-content">
+                <div class="definition">
+                    <strong>Thread:</strong> A lightweight execution unit within a single process. All threads in a process <strong>share the same memory space and Python interpreter</strong>. Multiple threads execute concurrently but <strong>only one thread executes Python bytecode at a time due to GIL</strong>.
+                </div>
+
+                <h3>Example:</h3>
+                <div class="code-block"><pre><code>
+                    import threading
+
+                    def worker():
+                        print(f"Thread: {threading.current_thread().name}")
+
+                    # Create 3 threads in the same process
+                    t1 = threading.Thread(target=worker, name="Thread-1")
+                    t2 = threading.Thread(target=worker, name="Thread-2")
+                    t3 = threading.Thread(target=worker, name="Thread-3")
+
+                    t1.start()
+                    t2.start()
+                    t3.start()
+
+                    # Output: All threads in the same process!
+                    # They share memory and one interpreter
+                </code></pre></div>
+
+                <p>All threads in a process share:</p>
+                <ul style="margin-left: 2rem; margin-top: 1rem;">
+                    <li>Same memory space (can access same variables)</li>
+                    <li>Same Python interpreter</li>
+                    <li>One GIL lock</li>
+                </ul>
+
+                <div class="highlight">
+                    <strong>Key Point:</strong> Multiple threads share resources but are serialized by GIL for CPU-bound work. Useful for IO-bound operations.
+                </div>
+            </div>
+        </section>
+
+        <!-- Hierarchy Section -->
+        <section id="hierarchy" class="card">
+            <h2>📊 Hierarchy: Program → Process → Threads</h2>
+
+            <div class="visualization" style="margin: 2rem 0;">
+                <div style="background: rgba(59, 130, 246, 0.1); border: 2px solid #3b82f6; padding: 2rem; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 1.5rem; margin-bottom: 1rem;">📄 Program</div>
+                    <div style="font-size: 0.9rem; color: var(--text-secondary);">Static code on disk</div>
+                </div>
+
+                <div style="text-align: center; font-size: 2rem; color: var(--primary);">↓ (Execute)</div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div style="background: rgba(16, 185, 129, 0.1); border: 2px solid #10b981; padding: 2rem; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 1.3rem; margin-bottom: 0.5rem;">⚙️ Process 1</div>
+                        <div style="font-size: 0.9rem; color: var(--text-secondary);">PID: 1001</div>
+                        <div style="margin-top: 1rem; font-size: 0.85rem;">Own Memory + Interpreter</div>
+                    </div>
+                    <div style="background: rgba(16, 185, 129, 0.1); border: 2px solid #10b981; padding: 2rem; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 1.3rem; margin-bottom: 0.5rem;">⚙️ Process 2</div>
+                        <div style="font-size: 0.9rem; color: var(--text-secondary);">PID: 1002</div>
+                        <div style="margin-top: 1rem; font-size: 0.85rem;">Own Memory + Interpreter</div>
+                    </div>
+                </div>
+
+                <div style="text-align: center; font-size: 2rem; color: var(--primary);">↓ (Within Process 1)</div>
+
+                <div style="background: rgba(59, 130, 246, 0.1); border: 2px solid #3b82f6; padding: 2rem; border-radius: 8px;">
+                    <div style="margin-bottom: 1.5rem;">
+                        <div style="display: flex; justify-content: space-around; margin-bottom: 1rem; flex-wrap: wrap;">
+                            <div class="thread-box">🧵 Thread 1</div>
+                            <div class="thread-box">🧵 Thread 2</div>
+                            <div class="thread-box">🧵 Thread 3</div>
+                        </div>
+                    </div>
+                    <div style="font-size: 0.9rem; color: var(--text-secondary); text-align: center;">
+                        All share memory & one GIL lock<br>
+                        Only one executes Python code at a time
+                    </div>
+                </div>
+            </div>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Aspect</th>
+                        <th>Program</th>
+                        <th>Process</th>
+                        <th>Thread</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Status</strong></td>
+                        <td>Static (on disk)</td>
+                        <td>Active (running)</td>
+                        <td>Active (within process)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Memory</strong></td>
+                        <td>N/A</td>
+                        <td>Own isolated space</td>
+                        <td>Shared with other threads</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Interpreter</strong></td>
+                        <td>N/A</td>
+                        <td>Own interpreter</td>
+                        <td>Shared interpreter</td>
+                    </tr>
+                    <tr>
+                        <td><strong>GIL</strong></td>
+                        <td>N/A</td>
+                        <td>No GIL between processes</td>
+                        <td><span class="badge-bad">YES - GIL lock</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Communication</strong></td>
+                        <td>N/A</td>
+                        <td>Inter-process (slow)</td>
+                        <td>Shared memory (fast)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Creation Cost</strong></td>
+                        <td>N/A</td>
+                        <td>Heavy (slow)</td>
+                        <td>Light (fast)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- GIL Section -->
+        <section id="gil" class="card">
+            <h2>🔒 Global Interpreter Lock (GIL)</h2>
+
+            <div class="definition">
+                <strong>GIL:</strong> A mutex (mutual exclusion lock) that protects access to Python objects in CPython. Only <strong>one thread at a time</strong> can execute Python bytecode, even on multi-core systems. This simplifies memory management but limits parallelism.
+            </div>
+
+            <h3>How GIL Works:</h3>
+
+            <div class="visualization">
+                <div style="background: rgba(239, 68, 68, 0.1); border: 2px solid #ef4444; padding: 2rem; border-radius: 8px; margin: 1.5rem 0;">
+                    <div style="text-align: center; margin-bottom: 1rem;">
+                        <div style="font-size: 1.2rem; font-weight: bold; color: var(--danger);">🔐 ONE GIL LOCK</div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 1rem; align-items: center;">
+                        <div style="background: rgba(59, 130, 246, 0.2); border: 2px solid #3b82f6; padding: 1rem 2rem; border-radius: 6px; min-width: 150px; text-align: center;">
+                            <div class="pulse">🧵 Thread 1 (HAS LOCK)</div>
+                            <div style="font-size: 0.85rem; color: var(--success); margin-top: 0.5rem;">Executing Python code</div>
+                        </div>
+                        <div style="font-size: 2rem;">⏳</div>
+                        <div style="background: rgba(239, 68, 68, 0.2); border: 2px dashed #ef4444; padding: 1rem 2rem; border-radius: 6px; min-width: 150px; text-align: center;">
+                            <div>🧵 Thread 2 (WAITING)</div>
+                            <div style="font-size: 0.85rem; color: var(--danger); margin-top: 0.5rem;">Blocked by GIL</div>
+                        </div>
+                        <div style="background: rgba(239, 68, 68, 0.2); border: 2px dashed #ef4444; padding: 1rem 2rem; border-radius: 6px; min-width: 150px; text-align: center;">
+                            <div>🧵 Thread 3 (WAITING)</div>
+                            <div style="font-size: 0.85rem; color: var(--danger); margin-top: 0.5rem;">Blocked by GIL</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3>GIL Impact: CPU-Bound vs IO-Bound</h3>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Work Type</th>
+                        <th>What Happens</th>
+                        <th>Threading Result</th>
+                        <th>Multiprocessing Result</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>CPU-Bound</strong><br>(heavy calculation)</td>
+                        <td>Threads compete for GIL. Only one executes at a time.</td>
+                        <td><span class="badge-bad">❌ Slower (overhead)</span></td>
+                        <td><span class="badge-good">✓ Fast (parallel)</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>IO-Bound</strong><br>(network, disk, API)</td>
+                        <td>Thread releases GIL during IO wait. Other threads run.</td>
+                        <td><span class="badge-good">✓ Fast (concurrent)</span></td>
+                        <td><span class="badge-good">✓ Fast (but overkill)</span></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Why GIL Exists</h3>
+
+            <div class="key-points">
+                <h3>Historical & Technical Reasons:</h3>
+                <ul>
+                    <li><strong>Memory Management:</strong> Python uses reference counting. GIL prevents multiple threads from corrupting the reference count simultaneously.</li>
+                    <li><strong>Implementation Simplicity:</strong> Single lock is simpler than fine-grained locking.</li>
+                    <li><strong>C Extension Compatibility:</strong> Most C extensions aren't thread-safe and rely on GIL.</li>
+                    <li><strong>Single-Threaded Performance:</strong> GIL makes single-threaded code faster (no locking overhead).</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Comparison Section -->
+        <section id="comparison" class="card">
+            <h2>⚖️ Threading vs Multiprocessing</h2>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Threading</th>
+                        <th>Multiprocessing</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>GIL Effect</strong></td>
+                        <td><span class="badge-bad">Affected - Limited parallelism</span></td>
+                        <td><span class="badge-good">Not affected - True parallelism</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Memory Overhead</strong></td>
+                        <td><span class="badge-good">Low - Shared memory</span></td>
+                        <td><span class="badge-bad">High - Separate interpreters</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>CPU-Bound</strong></td>
+                        <td><span class="badge-bad">Poor - GIL blocks</span></td>
+                        <td><span class="badge-good">Excellent - Parallel execution</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>IO-Bound</strong></td>
+                        <td><span class="badge-good">Good - GIL released during IO</span></td>
+                        <td><span class="badge-good">Good - But overkill</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Data Sharing</strong></td>
+                        <td><span class="badge-good">Easy - Shared memory</span></td>
+                        <td><span class="badge-bad">Complex - IPC needed</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Context Switching</strong></td>
+                        <td><span class="badge-good">Fast - Threads are light</span></td>
+                        <td><span class="badge-bad">Slow - Processes are heavy</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Debugging</strong></td>
+                        <td><span class="badge-bad">Hard - Race conditions</span></td>
+                        <td><span class="badge-good">Easier - Isolation</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Use Case</strong></td>
+                        <td>IO-bound tasks (web scraping, API calls)</td>
+                        <td>CPU-bound tasks (calculations, image processing)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>When to Use What:</h3>
+
+            <div class="grid-2">
+                <div style="background: rgba(16, 185, 129, 0.1); border: 2px solid #10b981; border-radius: 8px; padding: 2rem;">
+                    <h4 style="color: var(--success); margin-bottom: 1rem;">✅ Use Threading For:</h4>
+                    <ul style="list-style-position: inside; color: var(--text-secondary); gap: 0.5rem;">
+                        <li>Web scraping (IO-bound)</li>
+                        <li>API calls (IO-bound)</li>
+                        <li>File I/O (IO-bound)</li>
+                        <li>Database queries (IO-bound)</li>
+                        <li>Low resource overhead</li>
+                    </ul>
+                </div>
+
+                <div style="background: rgba(59, 130, 246, 0.1); border: 2px solid #3b82f6; border-radius: 8px; padding: 2rem;">
+                    <h4 style="color: var(--primary); margin-bottom: 1rem;">✅ Use Multiprocessing For:</h4>
+                    <ul style="list-style-position: inside; color: var(--text-secondary); gap: 0.5rem;">
+                        <li>Heavy calculations (CPU-bound)</li>
+                        <li>Image processing (CPU-bound)</li>
+                        <li>Data analysis (CPU-bound)</li>
+                        <li>Machine learning (CPU-bound)</li>
+                        <li>True parallelism needed</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Demo Section -->
+        <section id="demo" class="card">
+            <h2>🎮 Interactive Demo</h2>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab(event, 'demo-cpu')">CPU-Bound</button>
+                <button class="tab-btn" onclick="switchTab(event, 'demo-io')">IO-Bound</button>
+                <button class="tab-btn" onclick="switchTab(event, 'demo-explanation')">How It Works</button>
+            </div>
+
+            <!-- CPU-Bound Demo -->
+            <div id="demo-cpu" class="tab-content active">
+                <div class="demo-section">
+                    <div class="demo-title">CPU-Bound Task: Computing Prime Numbers</div>
+                    
+                    <p>Computing primes is CPU-intensive. Watch how threading gets blocked by GIL!</p>
+
+                    <div class="controls">
+                        <button onclick="runCPUThreading()">▶️ Run with Threading (GIL)</button>
+                        <button onclick="runCPUMultiprocessing()">▶️ Run with Multiprocessing</button>
+                        <button onclick="clearOutput()">🗑️ Clear Output</button>
+                    </div>
+
+                    <div class="output" id="cpu-output">Output will appear here...</div>
+                </div>
+
+                <div class="highlight">
+                    <strong>Observation:</strong> Threading should be ~2x slower than multiprocessing for CPU-bound work because GIL prevents parallel execution.
+                </div>
+            </div>
+
+            <!-- IO-Bound Demo -->
+            <div id="demo-io" class="tab-content">
+                <div class="demo-section">
+                    <div class="demo-title">IO-Bound Task: Simulated Network Requests</div>
+                    
+                    <p>Network calls release GIL. Both threading and multiprocessing should be fast!</p>
+
+                    <div class="controls">
+                        <button onclick="runIOSequential()">Sequential (No concurrency)</button>
+                        <button onclick="runIOThreading()">▶️ Run with Threading</button>
+                        <button onclick="clearOutput()">🗑️ Clear Output</button>
+                    </div>
+
+                    <div class="output" id="io-output">Output will appear here...</div>
+                </div>
+
+                <div class="highlight">
+                    <strong>Observation:</strong> Threading is much faster than sequential because threads can execute while others wait for IO. Multiprocessing would also be fast but with more overhead.
+                </div>
+            </div>
+
+            <!-- Explanation -->
+            <div id="demo-explanation" class="tab-content">
+                <h3>Simulated Timing Explanation</h3>
+
+                <div style="margin: 2rem 0;">
+                    <h4 style="color: var(--primary); margin: 1rem 0;">🧵 Threading Demo (CPU-Bound):</h4>
+                    <div class="code-block"><pre><pre><code>
+                        # Sequential: 10s (one thread, no GIL problem)
+                        time = 5s + 5s = 10s
+
+                        # Threading: ~11s (GIL causes contention overhead)
+                        Thread 1: 5s (has lock)
+                        Thread 2: waits...
+                        Thread 1 releases, Thread 2: 5s (has lock) + overhead
+                        Total: ~11s
+
+                        # Multiprocessing: ~5.5s (true parallelism)
+                        Process 1: 5s (parallel)
+                        Process 2: 5s (parallel) 
+                        Total: ~5.5s (both run simultaneously)
+                    </code></pre></div>
+                </div>
+
+                <div style="margin: 2rem 0;">
+                    <h4 style="color: var(--primary); margin: 1rem 0;">🌐 Threading Demo (IO-Bound):</h4>
+                    <div class="code-block"><pre><code>
+                        # Sequential: 3s (one request at a time)
+                        Request 1: 1s wait
+                        Request 2: 1s wait  
+                        Request 3: 1s wait
+                        Total: 3s
+
+                        # Threading: ~1s (GIL released during IO)
+                        Request 1: 1s (T1 waits, T2 starts)
+                        Request 2: 1s (T2 waits, T3 starts)
+                        Request 3: 1s (all waiting, completing)
+                        Total: ~1s (overlapping waits)
+
+                        GIL is RELEASED during IO, so threads can run!
+                    </code></pre></div>
+                </div>
+
+                <div class="key-points">
+                    <h3>Key Insight:</h3>
+                    <ul>
+                        <li><strong>CPU-Bound:</strong> Threading doesn't help (GIL serializes). Use multiprocessing.</li>
+                        <li><strong>IO-Bound:</strong> Threading helps (GIL released during wait). No need for multiprocessing overhead.</li>
+                        <li><strong>GIL:</strong> Not a bug, it's a design choice for memory safety and C compatibility.</li>
+                        <li><strong>Future:</strong> Python 3.13+ has experimental "free-threaded" mode that removes GIL.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Code Examples Section -->
+        <section id="examples" class="card">
+            <h2>💻 Code Examples</h2>
+
+            <h3>Example 1: CPU-Bound with Threading (Slow due to GIL)</h3>
+            <div class="code-block"><pre><code>
+                import threading
+                import time
+
+                def compute_prime(n):
+                    # CPU-intensive task
+                    count = 0
+                    for i in range(2, n):
+                        if is_prime(i):
+                            count += 1
+                    return count
+
+                def is_prime(num):
+                    if num < 2:
+                        return False
+                    for i in range(2, int(num**0.5)):
+                        if num % i == 0:
+                            return False
+                    return True
+
+                start = time.time()
+
+                # Threading (GIL blocks - SLOW)
+                threads = [
+                    threading.Thread(target=compute_prime, args=(100000,)),
+                    threading.Thread(target=compute_prime, args=(100000,))
+                ]
+                for t in threads: t.start()
+                for t in threads: t.join()
+
+                print(f"Threading: {time.time() - start:.2f}s")
+            </code></pre></div>
+
+            <h3>Example 2: CPU-Bound with Multiprocessing (Fast - No GIL)</h3>
+            <div class="code-block"><pre><code>
+                import multiprocessing
+                import time
+
+                def compute_prime(n):
+                    count = 0
+                    for i in range(2, n):
+                        if is_prime(i):
+                            count += 1
+                    return count
+
+                start = time.time()
+
+                # Multiprocessing (True parallelism - FAST)
+                processes = [
+                    multiprocessing.Process(target=compute_prime, args=(100000,)),
+                    multiprocessing.Process(target=compute_prime, args=(100000,))
+                ]
+                for p in processes: p.start()
+                for p in processes: p.join()
+
+                print(f"Multiprocessing: {time.time() - start:.2f}s")
+            </code></pre></div>
+
+            <h3>Example 3: IO-Bound with Threading (Fast - GIL Released)</h3>
+            <div class="code-block"><pre><code>
+                import threading
+                import requests
+                import time
+
+                def fetch_url(url):
+                    # IO-bound: GIL is released during network request
+                    response = requests.get(url)
+                    return response.status_code
+
+                urls = ['http://api.example.com/1', 'http://api.example.com/2']
+
+                start = time.time()
+
+                # Threading (GIL released during IO - FAST)
+                threads = [
+                    threading.Thread(target=fetch_url, args=(url,))
+                    for url in urls
+                ]
+                for t in threads: t.start()
+                for t in threads: t.join()
+
+                print(f"Threading IO-Bound: {time.time() - start:.2f}s")
+            </code></pre></div>
+        </section>
+
+        <!-- Key Takeaways -->
+        <section class="card">
+            <h2>📝 Key Takeaways</h2>
+
+            <div class="key-points">
+                <ul>
+                    <li><strong>Program:</strong> Static code on disk</li>
+                    <li><strong>Process:</strong> Running instance with own memory & interpreter</li>
+                    <li><strong>Thread:</strong> Lightweight unit sharing memory & interpreter within a process</li>
+                    <li><strong>GIL:</strong> Mutex protecting Python object access - only ONE thread executes Python bytecode at a time</li>
+                    <li><strong>CPU-Bound:</strong> Use multiprocessing (bypasses GIL)</li>
+                    <li><strong>IO-Bound:</strong> Use threading (GIL released during IO)</li>
+                    <li><strong>GIL simplifies memory management but limits parallelism</strong></li>
+                    <li><strong>Not a bug - a design choice for safety and C compatibility</strong></li>
+                </ul>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>🐍 Python GIL Educational Hub | Understanding Concurrency in Python</p>
+        <p style="margin-top: 1rem; color: var(--text-secondary); font-size: 0.9rem;">
+            Made for learning. Share your knowledge! 💡
+        </p>
+    </footer>
+
+    <script>
+        function switchTab(event, tabName) {
+            // Hide all tabs
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(c => c.classList.remove('active'));
+            
+            // Deactivate all buttons
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(b => b.classList.remove('active'));
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function scrollTo(id) {
+            const element = document.getElementById(id);
+            element.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function addOutput(elementId, message, className = '') {
+            const output = document.getElementById(elementId);
+            const line = document.createElement('div');
+            line.className = `output-line ${className}`;
+            line.textContent = message;
+            output.appendChild(line);
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function clearOutput() {
+            document.getElementById('cpu-output').innerHTML = '';
+            document.getElementById('io-output').innerHTML = '';
+        }
+
+        // CPU-Bound Demo
+        function runCPUThreading() {
+            const output = document.getElementById('cpu-output');
+            output.innerHTML = '';
+            
+            addOutput('cpu-output', '🧵 CPU-Bound with Threading (Simulated)', 'output-info');
+            addOutput('cpu-output', 'Computing primes with 2 threads...', 'output-info');
+            
+            setTimeout(() => {
+                addOutput('cpu-output', '[0.0s] Thread 1 acquired GIL', 'output-warning');
+                addOutput('cpu-output', '[0.0s] Thread 2 WAITING (GIL blocked)', 'output-error');
+            }, 500);
+
+            setTimeout(() => {
+                addOutput('cpu-output', '[3.2s] Thread 1 finished, released GIL', 'output-success');
+                addOutput('cpu-output', '[3.2s] Thread 2 acquired GIL', 'output-warning');
+            }, 3000);
+
+            setTimeout(() => {
+                addOutput('cpu-output', '[6.5s] Thread 2 finished', 'output-success');
+                addOutput('cpu-output', '', 'output-warning');
+                addOutput('cpu-output', '⏱️  Total Time: ~6.5s (sequential due to GIL)', 'output-warning');
+                addOutput('cpu-output', '❌ Not much faster than single thread!', 'output-error');
+            }, 6500);
+        }
+
+        function runCPUMultiprocessing() {
+            const output = document.getElementById('cpu-output');
+            output.innerHTML = '';
+            
+            addOutput('cpu-output', '⚙️  CPU-Bound with Multiprocessing', 'output-info');
+            addOutput('cpu-output', 'Computing primes with 2 separate processes...', 'output-info');
+            
+            setTimeout(() => {
+                addOutput('cpu-output', '[0.0s] Process 1 started (own interpreter)', 'output-success');
+                addOutput('cpu-output', '[0.0s] Process 2 started (own interpreter)', 'output-success');
+                addOutput('cpu-output', '[0.0s] Both running IN PARALLEL (No GIL!)', 'output-warning');
+            }, 500);
+
+            setTimeout(() => {
+                addOutput('cpu-output', '[3.2s] Process 1 finished', 'output-success');
+                addOutput('cpu-output', '[3.2s] Process 2 finished', 'output-success');
+                addOutput('cpu-output', '', 'output-warning');
+                addOutput('cpu-output', '⏱️  Total Time: ~3.2s (true parallelism)', 'output-success');
+                addOutput('cpu-output', '✅ ~2x faster than threading!', 'output-success');
+            }, 3300);
+        }
+
+        // IO-Bound Demo
+        function runIOSequential() {
+            const output = document.getElementById('io-output');
+            output.innerHTML = '';
+            
+            addOutput('io-output', '📡 Sequential Network Requests', 'output-info');
+            addOutput('io-output', 'Fetching 3 URLs one by one...', 'output-info');
+            
+            setTimeout(() => addOutput('io-output', '[0.0s] Request 1: GET api.example.com/1', 'output-warning'), 500);
+            setTimeout(() => addOutput('io-output', '[1.2s] Request 1: 200 OK ✓', 'output-success'), 1300);
+            
+            setTimeout(() => addOutput('io-output', '[1.2s] Request 2: GET api.example.com/2', 'output-warning'), 1500);
+            setTimeout(() => addOutput('io-output', '[2.4s] Request 2: 200 OK ✓', 'output-success'), 2500);
+            
+            setTimeout(() => addOutput('io-output', '[2.4s] Request 3: GET api.example.com/3', 'output-warning'), 2600);
+            setTimeout(() => {
+                addOutput('io-output', '[3.6s] Request 3: 200 OK ✓', 'output-success');
+                addOutput('io-output', '', 'output-warning');
+                addOutput('io-output', '⏱️  Total Time: ~3.6s (sequential)', 'output-warning');
+            }, 3700);
+        }
+
+        function runIOThreading() {
+            const output = document.getElementById('io-output');
+            output.innerHTML = '';
+            
+            addOutput('io-output', '🧵 IO-Bound with Threading', 'output-info');
+            addOutput('io-output', 'Fetching 3 URLs concurrently...', 'output-info');
+            
+            setTimeout(() => {
+                addOutput('io-output', '[0.0s] Thread 1: GET api.example.com/1', 'output-warning');
+                addOutput('io-output', '[0.0s] GIL RELEASED (thread waiting for IO)', 'output-success');
+                addOutput('io-output', '[0.0s] Thread 2: GET api.example.com/2 (same time!)', 'output-warning');
+            }, 500);
+            
+            setTimeout(() => {
+                addOutput('io-output', '[0.1s] Thread 3: GET api.example.com/3 (same time!)', 'output-warning');
+                addOutput('io-output', '[0.1s] All 3 threads OVERLAPPING waits', 'output-success');
+            }, 700);
+            
+            setTimeout(() => {
+                addOutput('io-output', '[1.2s] All requests completed', 'output-success');
+                addOutput('io-output', '', 'output-warning');
+                addOutput('io-output', '⏱️  Total Time: ~1.2s (concurrent!)', 'output-success');
+                addOutput('io-output', '✅ 3x faster than sequential!', 'output-success');
+                addOutput('io-output', '✅ GIL RELEASED during IO - no blocking!', 'output-success');
+            }, 1300);
+        }
+    </script>
+</body>
+</html>
