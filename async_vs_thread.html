@@ -1,0 +1,1607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Async vs Threading in Python - Complete Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #8b5cf6;
+            --secondary: #6d28d9;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --dark-bg: #0f172a;
+            --light-bg: #1e293b;
+            --card-bg: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --border: #475569;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #1a293e 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        nav {
+            position: sticky;
+            top: 0;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            z-index: 100;
+            padding: 1rem 0;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .nav-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #a78bfa, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            cursor: pointer;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Hero */
+        .hero {
+            text-align: center;
+            padding: 4rem 0;
+            margin-bottom: 3rem;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .hero .tagline {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        /* Card */
+        .card {
+            background: linear-gradient(135deg, rgba(51, 65, 85, 0.5) 0%, rgba(30, 41, 59, 0.5) 100%);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.15);
+        }
+
+        .card h2 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+        }
+
+        .card h3 {
+            color: var(--primary);
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 1rem;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: 2px solid var(--border);
+            color: var(--text-secondary);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .tab-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Definition */
+        .definition {
+            background: rgba(139, 92, 246, 0.1);
+            border-left: 4px solid var(--primary);
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 6px;
+        }
+
+        /* Comparison Table */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .comparison-table th {
+            background: rgba(139, 92, 246, 0.2);
+            color: var(--primary);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .comparison-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .badge-good {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        .badge-bad {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+
+        .badge-info {
+            background: rgba(59, 130, 246, 0.2);
+            color: var(--info);
+        }
+
+        /* Code Block */
+        .code-block {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+
+        .code-block code {
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* Visualization */
+        .visualization {
+            display: grid;
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .vis-box {
+            background: rgba(30, 41, 59, 0.5);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .vis-box h4 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        /* Thread/Coroutine visualization */
+        .execution-box {
+            display: inline-block;
+            padding: 1rem;
+            margin: 0.5rem;
+            border-radius: 6px;
+            min-width: 120px;
+            font-weight: 600;
+        }
+
+        .thread {
+            background: rgba(59, 130, 246, 0.3);
+            border: 2px solid #3b82f6;
+            color: #3b82f6;
+        }
+
+        .coroutine {
+            background: rgba(139, 92, 246, 0.3);
+            border: 2px solid #8b5cf6;
+            color: #8b5cf6;
+        }
+
+        .running {
+            background: rgba(16, 185, 129, 0.3);
+            border: 2px solid #10b981;
+            color: #10b981;
+        }
+
+        .waiting {
+            background: rgba(239, 68, 68, 0.3);
+            border: 2px solid #ef4444;
+            color: #ef4444;
+        }
+
+        /* Grid */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        /* Highlight */
+        .highlight {
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 4px solid var(--warning);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+            color: var(--text-secondary);
+        }
+
+        /* Key Points */
+        .key-points {
+            background: rgba(139, 92, 246, 0.05);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .key-points h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .key-points ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .key-points li {
+            padding: 0.5rem 0;
+            padding-left: 2rem;
+            position: relative;
+            color: var(--text-secondary);
+        }
+
+        .key-points li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        /* Demo */
+        .demo-section {
+            background: rgba(51, 65, 85, 0.5);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 1rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        button:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+        }
+
+        .output {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+            min-height: 200px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            max-height: 400px;
+        }
+
+        .output-line {
+            margin: 0.5rem 0;
+        }
+
+        .output-threading {
+            color: #3b82f6;
+        }
+
+        .output-asyncio {
+            color: #8b5cf6;
+        }
+
+        .output-success {
+            color: #10b981;
+        }
+
+        .output-warning {
+            color: #f59e0b;
+        }
+
+        .output-error {
+            color: #ef4444;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 3rem 0;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border);
+            margin-top: 4rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+
+            .nav-links {
+                gap: 1rem;
+                font-size: 0.9rem;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                gap: 0.5rem;
+            }
+
+            .tab-btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .pulse {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding: 2rem 0;
+        }
+
+        .timeline-item {
+            padding-left: 3rem;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 20px;
+            height: 20px;
+            background: var(--primary);
+            border-radius: 50%;
+            border: 3px solid var(--dark-bg);
+        }
+
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 20px;
+            width: 4px;
+            height: calc(100% + 2rem);
+            background: var(--border);
+        }
+
+        .timeline-item:last-child::after {
+            display: none;
+        }
+
+        .timeline-item strong {
+            color: var(--primary);
+        }
+
+        .comparison-side-by-side {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .side {
+            background: rgba(51, 65, 85, 0.5);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .side h4 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .side ul {
+            list-style: none;
+        }
+
+        .side li {
+            padding: 0.5rem 0;
+            color: var(--text-secondary);
+        }
+
+        .side li::before {
+            content: '▸';
+            color: var(--primary);
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+
+        .execution-timeline {
+            display: flex;
+            align-items: flex-start;
+            gap: 1.5rem;
+            margin: 2rem 0;
+            position: relative;
+        }
+
+        .execution-timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            width: 2px;
+            height: 100%;
+            background: rgba(139, 92, 246, 0.2);
+        }
+
+        .execution-step {
+            flex: 1;
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1rem;
+            position: relative;
+        }
+
+        .execution-step::before {
+            content: '';
+            position: absolute;
+            left: -10px;
+            top: 1.5rem;
+            width: 20px;
+            height: 20px;
+            background: var(--primary);
+            border-radius: 50%;
+            border: 2px solid var(--dark-bg);
+        }
+
+        .execution-step h5 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .comparison-side-by-side {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <div class="nav-title">⚡ Async vs Threading</div>
+            <ul class="nav-links">
+                <li><a href="#intro">Intro</a></li>
+                <li><a href="#comparison">Compare</a></li>
+                <li><a href="#execution">Execution</a></li>
+                <li><a href="#tradeoffs">Trade-offs</a></li>
+                <li><a href="#code">Code</a></li>
+                <li><a href="#demo">Demo</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Hero -->
+        <section class="hero">
+            <h1>Async vs Threading in Python</h1>
+            <p class="tagline">Master Concurrency: Understand Event Loops, Preemption & Cooperative Multitasking</p>
+        </section>
+
+        <!-- Introduction Section -->
+        <section id="intro" class="card">
+            <h2>🎯 Quick Overview</h2>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab(event, 'threading-intro')">Threading</button>
+                <button class="tab-btn" onclick="switchTab(event, 'asyncio-intro')">Asyncio</button>
+                <button class="tab-btn" onclick="switchTab(event, 'whenchoose')">When to Choose</button>
+            </div>
+
+            <!-- Threading Tab -->
+            <div id="threading-intro" class="tab-content active">
+                <div class="definition">
+                    <strong>Threading:</strong> Multiple threads managed by the OS scheduler. Each thread runs independently. The OS decides when to switch between threads (preemptive scheduling). <strong>Can block</strong> - if a thread does blocking IO, that thread is blocked (but others continue).
+                </div>
+
+                <h3>Key Characteristics:</h3>
+                <ul style="margin-left: 2rem; margin-top: 1rem;">
+                    <li>🔄 <strong>Preemptive Scheduling:</strong> OS forcibly switches threads</li>
+                    <li>🔒 <strong>Shared Memory:</strong> All threads share memory (race conditions possible)</li>
+                    <li>⚙️ <strong>Context Switch:</strong> Expensive (CPU state saved/restored)</li>
+                    <li>📦 <strong>Memory:</strong> ~2MB per thread (heavy)</li>
+                    <li>🎯 <strong>Scope:</strong> Good for 10-100 concurrent tasks</li>
+                    <li>⛔ <strong>GIL:</strong> Still affected for CPU-bound work</li>
+                </ul>
+
+                <h3>Example:</h3>
+                <div class="code-block"><pre><code>
+import threading
+import time
+
+def fetch_url(url):
+    print(f"Starting {url}")
+    time.sleep(2)  # Blocking IO (thread blocks)
+    print(f"Done {url}")
+
+threads = [
+    threading.Thread(target=fetch_url, args=(f"url{i}",))
+    for i in range(5)
+]
+
+for t in threads:
+    t.start()
+
+for t in threads:
+    t.join()
+
+# All 5 threads run concurrently
+# ~2 seconds total (not ~10 seconds)
+                </code></pre></div>
+            </div>
+
+            <!-- Asyncio Tab -->
+            <div id="asyncio-intro" class="tab-content">
+                <div class="definition">
+                    <strong>Asyncio:</strong> Single-threaded concurrency using an event loop. Coroutines yield control cooperatively at await points. The event loop decides which coroutine to run next. <strong>Cannot block</strong> - must use non-blocking async libraries.
+                </div>
+
+                <h3>Key Characteristics:</h3>
+                <ul style="margin-left: 2rem; margin-top: 1rem;">
+                    <li>🔄 <strong>Cooperative Scheduling:</strong> Coroutines yield control at await</li>
+                    <li>🔒 <strong>Shared Memory:</strong> Single thread - no race conditions</li>
+                    <li>⚡ <strong>No Context Switch:</strong> Coroutine switch is cheap (~CPU cache)</li>
+                    <li>📦 <strong>Memory:</strong> ~50KB per coroutine (lightweight)</li>
+                    <li>🎯 <strong>Scope:</strong> Excellent for 1000+ concurrent tasks</li>
+                    <li>✅ <strong>No GIL:</strong> Single thread, no GIL blocking</li>
+                </ul>
+
+                <h3>Example:</h3>
+                <div class="code-block"><pre><code>
+import asyncio
+import aiohttp
+
+async def fetch_url(url):
+    print(f"Starting {url}")
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            await resp.text()  # Yields control here
+    print(f"Done {url}")
+
+async def main():
+    tasks = [fetch_url(f"url{i}") for i in range(5)]
+    await asyncio.gather(*tasks)
+
+asyncio.run(main())
+
+# All 5 coroutines run concurrently in ONE thread
+# ~2 seconds total (not ~10 seconds)
+                </code></pre></div>
+            </div>
+
+            <!-- When to Choose Tab -->
+            <div id="whenchoose" class="tab-content">
+                <div class="grid-2">
+                    <div style="background: rgba(59, 130, 246, 0.1); border: 2px solid #3b82f6; border-radius: 8px; padding: 2rem;">
+                        <h4 style="color: #3b82f6; margin-bottom: 1rem;">✅ Use Threading For:</h4>
+                        <ul style="list-style: none;">
+                            <li style="padding: 0.5rem 0; color: var(--text-secondary);">• Few concurrent tasks (10-100)</li>
+                            <li style="padding: 0.5rem 0; color: var(--text-secondary);">• Blocking libraries (requests, etc.)</li>
+                            <li style="padding: 0.5rem 0; color: var(--text-secondary);">• Simpler code (fewer async issues)</li>
+                            <li style="padding: 0.5rem 0; color: var(--text-secondary);">• CPU + IO mix</li>
+                            <li style="padding: 0.5rem 0; color: var(--text-secondary);">• Production web servers (generally)</li>
+                        </ul>
+                    </div>
+
+                    <div style="background: rgba(139, 92, 246, 0.1); border: 2px solid #8b5cf6; border-radius: 8px; padding: 2rem;">
+                        <h4 style="color: #8b5cf6; margin-bottom: 1rem;">✅ Use Asyncio For:</h4>
+                        <ul style="list-style: none;">
+                            <li style="padding: 0.5rem 0; color: var(--text-secondary);">• Many concurrent tasks (1000+)</li>
+                            <li style="padding: 0.5rem 0; color: var(--text-secondary);">• Non-blocking libraries (aiohttp, etc.)</li>
+                            <li style="padding: 0.5rem 0; color: var(--text-secondary);">• High-performance requirements</li>
+                            <li style="padding: 0.5rem 0; color: var(--text-secondary);">• Primarily IO-bound</li>
+                            <li style="padding: 0.5rem 0; color: var(--text-secondary);">• WebSockets, real-time systems</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="highlight" style="margin-top: 2rem;">
+                    <strong>Rule of Thumb:</strong> Threading for general IO-bound tasks, Asyncio for high-concurrency scenarios. Don't over-engineer with Asyncio unless you need thousands of concurrent connections.
+                </div>
+            </div>
+        </section>
+
+        <!-- Detailed Comparison -->
+        <section id="comparison" class="card">
+            <h2>⚖️ Detailed Comparison</h2>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Aspect</th>
+                        <th>Threading</th>
+                        <th>Asyncio</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Scheduling</strong></td>
+                        <td><span class="badge badge-info">Preemptive (OS)</span></td>
+                        <td><span class="badge badge-info">Cooperative (Event Loop)</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Threads</strong></td>
+                        <td>Multiple threads</td>
+                        <td>Single thread</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Memory per unit</strong></td>
+                        <td>~2-8 MB per thread</td>
+                        <td>~50-100 KB per coroutine</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Max concurrent units</strong></td>
+                        <td>100-1000 (limited)</td>
+                        <td>10,000+ (scalable)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Context switching</strong></td>
+                        <td><span class="badge badge-bad">Expensive</span></td>
+                        <td><span class="badge badge-good">Cheap</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Blocking IO</strong></td>
+                        <td><span class="badge badge-good">Can block thread</span></td>
+                        <td><span class="badge badge-bad">Must be async</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Shared memory</strong></td>
+                        <td><span class="badge badge-bad">Race conditions</span></td>
+                        <td><span class="badge badge-good">No races</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Complexity</strong></td>
+                        <td><span class="badge badge-good">Moderate</span></td>
+                        <td><span class="badge badge-bad">Complex</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Debugging</strong></td>
+                        <td><span class="badge badge-bad">Hard (race conditions)</span></td>
+                        <td><span class="badge badge-good">Easier (single-threaded)</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>CPU-Bound tasks</strong></td>
+                        <td><span class="badge badge-bad">GIL limits (use multiprocessing)</span></td>
+                        <td><span class="badge badge-bad">Not suitable</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>IO-Bound tasks</strong></td>
+                        <td><span class="badge badge-good">Good</span></td>
+                        <td><span class="badge badge-good">Excellent (scalable)</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Library ecosystem</strong></td>
+                        <td><span class="badge badge-good">Mature (requests, etc.)</span></td>
+                        <td><span class="badge badge-warning">Growing (aiohttp, etc.)</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Learning curve</strong></td>
+                        <td>Easy (familiar patterns)</td>
+                        <td>Steep (async/await, event loop)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Execution Model -->
+        <section id="execution" class="card">
+            <h2>🔄 Execution Models Explained</h2>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab(event, 'threading-exec')">Threading</button>
+                <button class="tab-btn" onclick="switchTab(event, 'asyncio-exec')">Asyncio</button>
+                <button class="tab-btn" onclick="switchTab(event, 'timeline')">Timeline</button>
+            </div>
+
+            <!-- Threading Execution -->
+            <div id="threading-exec" class="tab-content active">
+                <h3>How Threading Works:</h3>
+
+                <div class="timeline" style="margin: 2rem 0;">
+                    <div class="timeline-item">
+                        <strong>1. Create Threads</strong><br>
+                        <span style="color: var(--text-secondary);">Create N thread objects, each with a target function</span>
+                    </div>
+                    <div class="timeline-item">
+                        <strong>2. OS Scheduler Takes Over</strong><br>
+                        <span style="color: var(--text-secondary);">OS decides which thread runs, for how long, on which CPU core</span>
+                    </div>
+                    <div class="timeline-item">
+                        <strong>3. Preemptive Context Switching</strong><br>
+                        <span style="color: var(--text-secondary);">OS forcibly switches threads after timeslice (even mid-execution)</span>
+                    </div>
+                    <div class="timeline-item">
+                        <strong>4. Threads Run in Parallel (Multi-core)</strong><br>
+                        <span style="color: var(--text-secondary);">On multi-core, threads execute truly in parallel</span>
+                    </div>
+                    <div class="timeline-item">
+                        <strong>5. Threads Synchronize</strong><br>
+                        <span style="color: var(--text-secondary);">join() waits for all threads to complete</span>
+                    </div>
+                </div>
+
+                <h3>Preemption Example:</h3>
+                <div style="background: rgba(51, 65, 85, 0.5); border: 2px solid var(--border); border-radius: 8px; padding: 2rem; margin: 1rem 0;">
+                    <div style="font-size: 0.9rem; line-height: 1.8;">
+                        <div>CPU1: Thread1 running → [0.01s elapsed] → <span class="pulse">⏱️ OS interrupts</span></div>
+                        <div>CPU2: Thread2 running → [0.01s elapsed] → <span class="pulse">⏱️ OS interrupts</span></div>
+                        <br>
+                        <div>CPU1: <strong>Switch to Thread2</strong> (CPU state saved)</div>
+                        <div>CPU2: <strong>Switch to Thread1</strong> (CPU state saved)</div>
+                        <br>
+                        <div style="color: var(--text-secondary); font-size: 0.85rem;">
+                            ✓ Happens automatically (you don't control it)<br>
+                            ✓ Fast enough for responsiveness<br>
+                            ✓ Can context switch mid-operation
+                        </div>
+                    </div>
+                </div>
+
+                <div class="highlight">
+                    <strong>Key:</strong> OS controls switching. Threads can be interrupted anywhere, creating potential race conditions but allowing true parallelism.
+                </div>
+            </div>
+
+            <!-- Asyncio Execution -->
+            <div id="asyncio-exec" class="tab-content">
+                <h3>How Asyncio Works:</h3>
+
+                <div class="timeline" style="margin: 2rem 0;">
+                    <div class="timeline-item">
+                        <strong>1. Create Coroutines</strong><br>
+                        <span style="color: var(--text-secondary);">Create async functions (coroutines), not threads</span>
+                    </div>
+                    <div class="timeline-item">
+                        <strong>2. Event Loop Manages Everything</strong><br>
+                        <span style="color: var(--text-secondary);">Single event loop queue runs all coroutines in one thread</span>
+                    </div>
+                    <div class="timeline-item">
+                        <strong>3. Cooperative Yielding</strong><br>
+                        <span style="color: var(--text-secondary);">Coroutine hits await → yields control back to event loop</span>
+                    </div>
+                    <div class="timeline-item">
+                        <strong>4. Event Loop Checks Completions</strong><br>
+                        <span style="color: var(--text-secondary);">If IO finished, resume that coroutine; else run another</span>
+                    </div>
+                    <div class="timeline-item">
+                        <strong>5. Coroutines Resume</strong><br>
+                        <span style="color: var(--text-secondary);">When IO complete, event loop resumes from await point</span>
+                    </div>
+                </div>
+
+                <h3>Event Loop Cycle:</h3>
+                <div style="background: rgba(51, 65, 85, 0.5); border: 2px solid var(--border); border-radius: 8px; padding: 2rem; margin: 1rem 0;">
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <div class="execution-step">
+                            <h5>1️⃣ Check Ready Coroutines</h5>
+                            <span style="font-size: 0.9rem; color: var(--text-secondary);">Which coroutines are ready to run?</span>
+                        </div>
+                        <div style="text-align: center; color: var(--primary);">↓</div>
+                        <div class="execution-step">
+                            <h5>2️⃣ Run Coroutine</h5>
+                            <span style="font-size: 0.9rem; color: var(--text-secondary);">Execute until await is hit</span>
+                        </div>
+                        <div style="text-align: center; color: var(--primary);">↓</div>
+                        <div class="execution-step">
+                            <h5>3️⃣ Coroutine Yields (await)</h5>
+                            <span style="font-size: 0.9rem; color: var(--text-secondary);">await IO_operation → suspend, give control back</span>
+                        </div>
+                        <div style="text-align: center; color: var(--primary);">↓</div>
+                        <div class="execution-step">
+                            <h5>4️⃣ Check IO Status</h5>
+                            <span style="font-size: 0.9rem; color: var(--text-secondary);">Is any suspended coroutine's IO done?</span>
+                        </div>
+                        <div style="text-align: center; color: var(--primary);">↓</div>
+                        <div class="execution-step">
+                            <h5>5️⃣ Next Iteration</h5>
+                            <span style="font-size: 0.9rem; color: var(--text-secondary);">Back to step 1 (loop continues)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="highlight">
+                    <strong>Key:</strong> You control yielding points (await). Single thread, no race conditions, but must be careful not to block the event loop.
+                </div>
+            </div>
+
+            <!-- Timeline Comparison -->
+            <div id="timeline" class="tab-content">
+                <h3>Visual Timeline: Threading vs Asyncio</h3>
+
+                <h4 style="color: var(--info); margin-top: 1.5rem; margin-bottom: 1rem;">Threading Timeline (2 threads, 5 tasks):</h4>
+                <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid #3b82f6; border-radius: 6px; padding: 1.5rem; font-family: monospace; font-size: 0.85rem; line-height: 2;">
+                    <div>t=0ms   │ <span class="thread execution-box">Task1 (T1)</span></div>
+                    <div>t=5ms   │ <span class="thread execution-box">Task2 (T2)</span> <span class="waiting execution-box">Task1 (waiting)</span></div>
+                    <div>t=10ms  │ <span class="thread execution-box">Task3 (T1)</span> <span class="waiting execution-box">Task2 (waiting)</span></div>
+                    <div>t=15ms  │ <span class="waiting execution-box">Task3 (waiting)</span> <span class="thread execution-box">Task4 (T2)</span></div>
+                    <div>t=...   │ Context switches continue...</div>
+                    <div style="margin-top: 0.5rem; color: var(--text-secondary); font-size: 0.9rem;">
+                        ✓ OS controls timing<br>
+                        ✓ Threads can preempt at any point<br>
+                        ⚠️  Unpredictable order of execution
+                    </div>
+                </div>
+
+                <h4 style="color: var(--primary); margin-top: 2rem; margin-bottom: 1rem;">Asyncio Timeline (1 thread, 5 coroutines):</h4>
+                <div style="background: rgba(139, 92, 246, 0.1); border: 1px solid #8b5cf6; border-radius: 6px; padding: 1.5rem; font-family: monospace; font-size: 0.85rem; line-height: 2;">
+                    <div>t=0ms   │ <span class="coroutine execution-box">Coro1</span></div>
+                    <div>t=0.1ms │ Coro1 hits await → yields</div>
+                    <div>t=0.1ms │ <span class="coroutine execution-box">Coro2</span></div>
+                    <div>t=0.2ms │ Coro2 hits await → yields</div>
+                    <div>t=0.2ms │ <span class="coroutine execution-box">Coro3</span></div>
+                    <div>t=0.3ms │ Coro3 hits await → yields</div>
+                    <div>t=1000ms │ Coro1 IO done → <span class="running execution-box">Resume Coro1</span></div>
+                    <div style="margin-top: 0.5rem; color: var(--text-secondary); font-size: 0.9rem;">
+                        ✓ You control yielding (await)<br>
+                        ✓ Single thread, deterministic<br>
+                        ✓ Much less overhead
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Trade-offs Section -->
+        <section id="tradeoffs" class="card">
+            <h2>⚡ Trade-offs & Considerations</h2>
+
+            <div class="comparison-side-by-side">
+                <div class="side">
+                    <h4>Threading Pros:</h4>
+                    <ul>
+                        <li>Simpler code (synchronous style)</li>
+                        <li>Mature ecosystem (requests, etc.)</li>
+                        <li>Easy to understand (familiar patterns)</li>
+                        <li>Good for moderate concurrency</li>
+                        <li>Works with blocking libraries</li>
+                    </ul>
+
+                    <h4 style="margin-top: 2rem;">Threading Cons:</h4>
+                    <ul>
+                        <li>Higher memory per thread (~2-8MB)</li>
+                        <li>Context switch overhead (expensive)</li>
+                        <li>Limited to ~1000 concurrent units</li>
+                        <li>Race conditions (locks needed)</li>
+                        <li>GIL still affects CPU-bound</li>
+                    </ul>
+                </div>
+
+                <div class="side">
+                    <h4>Asyncio Pros:</h4>
+                    <ul>
+                        <li>Low memory per coroutine (~50KB)</li>
+                        <li>No context switch overhead</li>
+                        <li>Scales to 10,000+ coroutines</li>
+                        <li>No race conditions (single-threaded)</li>
+                        <li>Better performance at scale</li>
+                    </ul>
+
+                    <h4 style="margin-top: 2rem;">Asyncio Cons:</h4>
+                    <ul>
+                        <li>Steep learning curve (async/await)</li>
+                        <li>Must use async libraries only</li>
+                        <li>Can't block event loop</li>
+                        <li>Smaller ecosystem (but growing)</li>
+                        <li>Complex debugging</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3 style="margin-top: 2rem;">Common Pitfalls:</h3>
+
+            <div style="margin: 2rem 0; display: grid; gap: 1.5rem;">
+                <div style="background: rgba(239, 68, 68, 0.1); border-left: 4px solid #ef4444; padding: 1.5rem; border-radius: 6px;">
+                    <h4 style="color: #ef4444; margin-bottom: 0.5rem;">❌ Threading: Race Conditions</h4>
+                    <p style="color: var(--text-secondary);">Multiple threads accessing shared data without synchronization → data corruption</p>
+                    <div class="code-block" style="margin-top: 1rem;"><pre><code>
+# BAD - Race condition!
+counter = 0
+
+def increment():
+    global counter
+    counter += 1  # Not atomic!
+
+threads = [threading.Thread(target=increment) for _ in range(1000)]
+# counter != 1000 (unpredictable)
+                    </code></pre></div>
+                </div>
+
+                <div style="background: rgba(239, 68, 68, 0.1); border-left: 4px solid #ef4444; padding: 1.5rem; border-radius: 6px;">
+                    <h4 style="color: #ef4444; margin-bottom: 0.5rem;">❌ Asyncio: Blocking Event Loop</h4>
+                    <p style="color: var(--text-secondary);">Synchronous blocking call (time.sleep, requests.get) freezes all coroutines</p>
+                    <div class="code-block" style="margin-top: 1rem;"><pre><code>
+# BAD - Blocks event loop!
+async def fetch():
+    response = requests.get(url)  # Blocking! ❌
+    return response.text()
+
+# GOOD - Non-blocking
+async def fetch():
+    async with aiohttp.ClientSession() as s:
+        async with s.get(url) as r:  # Non-blocking ✓
+            return await r.text()
+                    </code></pre></div>
+                </div>
+
+                <div style="background: rgba(245, 158, 11, 0.1); border-left: 4px solid #f59e0b; padding: 1.5rem; border-radius: 6px;">
+                    <h4 style="color: #f59e0b; margin-bottom: 0.5rem;">⚠️ Over-engineering with Asyncio</h4>
+                    <p style="color: var(--text-secondary);">Using asyncio when threading would suffice. Asyncio complexity isn't justified for <100 concurrent tasks.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Code Examples -->
+        <section id="code" class="card">
+            <h2>💻 Code Examples</h2>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab(event, 'code-threading')">Threading</button>
+                <button class="tab-btn" onclick="switchTab(event, 'code-asyncio')">Asyncio</button>
+                <button class="tab-btn" onclick="switchTab(event, 'code-comparison')">Side-by-Side</button>
+            </div>
+
+            <!-- Threading Code -->
+            <div id="code-threading" class="tab-content active">
+                <h3>Example: Fetching 5 URLs with Threading</h3>
+                <div class="code-block"><pre><code>
+import threading
+import requests
+import time
+
+def fetch_url(url):
+    """Fetch a URL"""
+    print(f"[{threading.current_thread().name}] Fetching {url}")
+    response = requests.get(url)  # Blocking, but thread blocks
+    print(f"[{threading.current_thread().name}] Done {url}")
+
+urls = [
+    "https://jsonplaceholder.typicode.com/posts/1",
+    "https://jsonplaceholder.typicode.com/posts/2",
+    "https://jsonplaceholder.typicode.com/posts/3",
+]
+
+start = time.time()
+
+# Create threads
+threads = []
+for url in urls:
+    t = threading.Thread(target=fetch_url, args=(url,))
+    threads.append(t)
+    t.start()
+
+# Wait for all threads
+for t in threads:
+    t.join()
+
+elapsed = time.time() - start
+print(f"\nTotal time: {elapsed:.2f}s")
+print(f"Sequential would be: ~9s")
+print(f"Threading: ~3s (3 concurrent)")
+                </code></pre></div>
+
+                <div class="highlight">
+                    <strong>Key Points:</strong>
+                    <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                        <li>Threads are created and started</li>
+                        <li>OS scheduler handles switching</li>
+                        <li>join() waits for completion</li>
+                        <li>Blocking IO is okay (thread blocks, others run)</li>
+                        <li>Simple, synchronous-style code</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Asyncio Code -->
+            <div id="code-asyncio" class="tab-content">
+                <h3>Example: Fetching 5 URLs with Asyncio</h3>
+                <div class="code-block"><pre><code>
+import asyncio
+import aiohttp
+import time
+
+async def fetch_url(session, url):
+    """Fetch a URL asynchronously"""
+    print(f"Fetching {url}")
+    async with session.get(url) as resp:
+        await resp.json()  # Yields control here
+    print(f"Done {url}")
+
+async def main():
+    urls = [
+        "https://jsonplaceholder.typicode.com/posts/1",
+        "https://jsonplaceholder.typicode.com/posts/2",
+        "https://jsonplaceholder.typicode.com/posts/3",
+    ]
+
+    start = time.time()
+
+    # Create session
+    async with aiohttp.ClientSession() as session:
+        # Create tasks (not threads!)
+        tasks = [fetch_url(session, url) for url in urls]
+        # Wait for all
+        await asyncio.gather(*tasks)
+
+    elapsed = time.time() - start
+    print(f"\nTotal time: {elapsed:.2f}s")
+    print(f"Sequential would be: ~9s")
+    print(f"Asyncio: ~3s (3 concurrent)")
+
+asyncio.run(main())
+                </code></pre></div>
+
+                <div class="highlight">
+                    <strong>Key Points:</strong>
+                    <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                        <li>async def creates coroutines (not threads)</li>
+                        <li>await yields control cooperatively</li>
+                        <li>asyncio.gather() waits for all</li>
+                        <li>Must use async libraries (aiohttp, not requests)</li>
+                        <li>Single thread manages all coroutines</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Side-by-Side Comparison -->
+            <div id="code-comparison" class="tab-content">
+                <h3>Threading vs Asyncio: Same Task</h3>
+
+                <div class="comparison-side-by-side" style="margin-top: 2rem;">
+                    <div style="background: rgba(59, 130, 246, 0.1); border: 2px solid #3b82f6; border-radius: 8px; padding: 1.5rem;">
+                        <h4 style="color: #3b82f6; margin-bottom: 1rem;">Threading Approach</h4>
+                        <div class="code-block"><pre><code>
+import threading
+
+def work():
+    print("Working...")
+    time.sleep(2)  # OK - thread blocks
+
+threads = [
+    threading.Thread(target=work)
+    for _ in range(100)
+]
+
+for t in threads:
+    t.start()
+for t in threads:
+    t.join()
+
+# ~100 threads in memory
+# High memory overhead
+# OS scheduler manages
+                        </code></pre></div>
+                    </div>
+
+                    <div style="background: rgba(139, 92, 246, 0.1); border: 2px solid #8b5cf6; border-radius: 8px; padding: 1.5rem;">
+                        <h4 style="color: #8b5cf6; margin-bottom: 1rem;">Asyncio Approach</h4>
+                        <div class="code-block"><pre><code>
+import asyncio
+
+async def work():
+    print("Working...")
+    await asyncio.sleep(2)  # NOT time.sleep!
+
+async def main():
+    tasks = [
+        work()
+        for _ in range(100)
+    ]
+    await asyncio.gather(*tasks)
+
+asyncio.run(main())
+
+# ~100 coroutines in memory
+# Low memory overhead
+# Event loop manages
+                        </code></pre></div>
+                    </div>
+                </div>
+
+                <div class="highlight" style="margin-top: 2rem;">
+                    <strong>Memory Comparison for 100 concurrent tasks:</strong><br>
+                    Threading: ~200-400 MB (2-4 MB per thread)<br>
+                    Asyncio: ~10-15 MB (100-150 KB per coroutine) ← 20-40x less!
+                </div>
+            </div>
+        </section>
+
+        <!-- Demo Section -->
+        <section id="demo" class="card">
+            <h2>🎮 Interactive Demo</h2>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab(event, 'demo-compare')">Performance</button>
+                <button class="tab-btn" onclick="switchTab(event, 'demo-scale')">Scalability</button>
+                <button class="tab-btn" onclick="switchTab(event, 'demo-io')">IO Simulation</button>
+            </div>
+
+            <!-- Performance Demo -->
+            <div id="demo-compare" class="tab-content active">
+                <div class="demo-section">
+                    <h3 style="margin-bottom: 1rem;">Concurrent Operations: 5 URLs, ~1s each</h3>
+
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem;">
+                        <button onclick="runThreadingDemo()">▶️ Run Threading Demo</button>
+                        <button onclick="runAsyncioDemo()">▶️ Run Asyncio Demo</button>
+                        <button onclick="runSequentialDemo()">▶️ Run Sequential</button>
+                        <button onclick="clearDemoOutput()">🗑️ Clear</button>
+                    </div>
+
+                    <div class="output" id="demo-output">Output will appear here...</div>
+                </div>
+            </div>
+
+            <!-- Scalability Demo -->
+            <div id="demo-scale" class="tab-content">
+                <div class="demo-section">
+                    <h3 style="margin-bottom: 1rem;">Scalability: Memory & Performance</h3>
+
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem;">
+                        <button onclick="scalabilityTest('threading', 10)">Threading (10)</button>
+                        <button onclick="scalabilityTest('threading', 100)">Threading (100)</button>
+                        <button onclick="scalabilityTest('threading', 1000)">Threading (1000)</button>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem;">
+                        <button onclick="scalabilityTest('asyncio', 10)">Asyncio (10)</button>
+                        <button onclick="scalabilityTest('asyncio', 100)">Asyncio (100)</button>
+                        <button onclick="scalabilityTest('asyncio', 1000)">Asyncio (1000)</button>
+                        <button onclick="scalabilityTest('asyncio', 10000)">Asyncio (10000)</button>
+                    </div>
+
+                    <div class="output" id="scale-output">Output will appear here...</div>
+                </div>
+            </div>
+
+            <!-- IO Simulation -->
+            <div id="demo-io" class="tab-content">
+                <div class="demo-section">
+                    <h3 style="margin-bottom: 1rem;">IO Simulation: 3 Concurrent Requests</h3>
+
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem;">
+                        <button onclick="simulateIO('sequential')">Sequential (3s)</button>
+                        <button onclick="simulateIO('threading')">Threading</button>
+                        <button onclick="simulateIO('asyncio')">Asyncio</button>
+                        <button onclick="clearDemoOutput()">🗑️ Clear</button>
+                    </div>
+
+                    <div class="output" id="demo-output">Output will appear here...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Key Takeaways -->
+        <section class="card">
+            <h2>📝 Key Takeaways</h2>
+
+            <div class="key-points">
+                <ul>
+                    <li><strong>Threading:</strong> Preemptive, OS-managed, multiple threads, good for 10-100 concurrent tasks</li>
+                    <li><strong>Asyncio:</strong> Cooperative, event-loop-managed, single thread, excellent for 1000+ concurrent tasks</li>
+                    <li><strong>GIL:</strong> Still exists in asyncio, but single thread means no GIL contention</li>
+                    <li><strong>Memory:</strong> Threading ~2-8MB/thread, Asyncio ~50KB/coroutine (40x difference!)</li>
+                    <li><strong>Context Switching:</strong> Threading expensive, Asyncio cheap</li>
+                    <li><strong>Race Conditions:</strong> Threading needs locks, Asyncio is single-threaded (no races)</li>
+                    <li><strong>Blocking:</strong> Threading handles blocking IO fine, Asyncio needs non-blocking libraries</li>
+                    <li><strong>Rule:</strong> Use Threading for general IO-bound tasks, Asyncio for high-concurrency scenarios</li>
+                    <li><strong>Default:</strong> Threading first. Only use Asyncio if you need 1000+ concurrent connections</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Decision Tree -->
+        <section class="card">
+            <h2>🎯 Decision Tree: Which One?</h2>
+
+            <div style="background: rgba(51, 65, 85, 0.5); border: 2px solid var(--border); border-radius: 8px; padding: 2rem; margin: 2rem 0;">
+                <div style="font-weight: 600; color: var(--primary); font-size: 1.1rem; margin-bottom: 1.5rem;">
+                    ❓ How many concurrent connections?
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                    <div style="background: rgba(59, 130, 246, 0.1); border: 2px solid #3b82f6; border-radius: 8px; padding: 1.5rem;">
+                        <div style="font-weight: 600; color: #3b82f6; margin-bottom: 1rem;">
+                            < 100 concurrent
+                        </div>
+                        <div style="color: var(--text-secondary); margin-bottom: 1rem;">
+                            Web server handling typical traffic, few background jobs, general use
+                        </div>
+                        <div style="background: rgba(59, 130, 246, 0.2); border: 1px solid #3b82f6; padding: 1rem; border-radius: 6px; text-align: center; color: #3b82f6; font-weight: 600;">
+                            ✅ Use Threading
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(139, 92, 246, 0.1); border: 2px solid #8b5cf6; border-radius: 8px; padding: 1.5rem;">
+                        <div style="font-weight: 600; color: #8b5cf6; margin-bottom: 1rem;">
+                            1000+ concurrent
+                        </div>
+                        <div style="color: var(--text-secondary); margin-bottom: 1rem;">
+                            WebSocket server, real-time system, massive scale, high-load API
+                        </div>
+                        <div style="background: rgba(139, 92, 246, 0.2); border: 1px solid #8b5cf6; padding: 1rem; border-radius: 6px; text-align: center; color: #8b5cf6; font-weight: 600;">
+                            ✅ Use Asyncio
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 2rem; padding: 1rem; background: rgba(16, 185, 129, 0.1); border-left: 4px solid #10b981; border-radius: 6px; color: var(--text-secondary);">
+                    <strong style="color: #10b981;">100-1000 concurrent?</strong><br>
+                    Consider Threading first. Use Asyncio only if you need extreme scalability or have async-native libraries readily available.
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>⚡ Async vs Threading Educational Hub | Master Python Concurrency</p>
+        <p style="margin-top: 1rem; color: var(--text-secondary); font-size: 0.9rem;">
+            Understanding execution models, event loops, and preemption → Better concurrent code 💡
+        </p>
+    </footer>
+
+    <script>
+        function switchTab(event, tabName) {
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(c => c.classList.remove('active'));
+
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(b => b.classList.remove('active'));
+
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function scrollTo(id) {
+            const element = document.getElementById(id);
+            element.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function addOutput(elementId, message, className = '') {
+            const output = document.getElementById(elementId);
+            const line = document.createElement('div');
+            line.className = `output-line ${className}`;
+            line.textContent = message;
+            output.appendChild(line);
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function clearDemoOutput() {
+            document.getElementById('demo-output').innerHTML = '';
+            document.getElementById('scale-output').innerHTML = '';
+        }
+
+        function runThreadingDemo() {
+            const output = document.getElementById('demo-output');
+            output.innerHTML = '';
+
+            addOutput('demo-output', '🧵 Threading Demo: 5 URLs (simulated ~1s each)', 'output-threading');
+            addOutput('demo-output', 'Creating 5 threads...', 'output-threading');
+
+            setTimeout(() => {
+                addOutput('demo-output', '[0.0s] Thread-1: Fetching URL1', 'output-threading');
+                addOutput('demo-output', '[0.0s] Thread-2: Fetching URL2', 'output-threading');
+                addOutput('demo-output', '[0.0s] Thread-3: Fetching URL3', 'output-threading');
+                addOutput('demo-output', '[0.0s] Thread-4: Fetching URL4', 'output-threading');
+                addOutput('demo-output', '[0.0s] Thread-5: Fetching URL5', 'output-threading');
+            }, 500);
+
+            setTimeout(() => {
+                addOutput('demo-output', '[1.0s] URL1 done', 'output-success');
+            }, 1500);
+
+            setTimeout(() => {
+                addOutput('demo-output', '[1.0s] URL2 done', 'output-success');
+            }, 1700);
+
+            setTimeout(() => {
+                addOutput('demo-output', '[1.0s] URL3 done', 'output-success');
+            }, 1900);
+
+            setTimeout(() => {
+                addOutput('demo-output', '[1.0s] URL4 done', 'output-success');
+            }, 2100);
+
+            setTimeout(() => {
+                addOutput('demo-output', '[1.0s] URL5 done', 'output-success');
+                addOutput('demo-output', '', 'output-threading');
+                addOutput('demo-output', '⏱️  Total Time: ~1.0s (concurrent)', 'output-success');
+                addOutput('demo-output', '📊 5 threads running in parallel', 'output-threading');
+            }, 2300);
+        }
+
+        function runAsyncioDemo() {
+            const output = document.getElementById('demo-output');
+            output.innerHTML = '';
+
+            addOutput('demo-output', '⚡ Asyncio Demo: 5 URLs (simulated ~1s each)', 'output-asyncio');
+            addOutput('demo-output', 'Creating 5 coroutines...', 'output-asyncio');
+
+            setTimeout(() => {
+                addOutput('demo-output', '[0.0ms] Coro1: Fetching URL1 → await', 'output-asyncio');
+                addOutput('demo-output', '[0.1ms] Event loop: Coro1 yielded', 'output-asyncio');
+                addOutput('demo-output', '[0.1ms] Coro2: Fetching URL2 → await', 'output-asyncio');
+                addOutput('demo-output', '[0.2ms] Event loop: Coro2 yielded', 'output-asyncio');
+                addOutput('demo-output', '[0.2ms] Coro3: Fetching URL3 → await', 'output-asyncio');
+                addOutput('demo-output', '[0.3ms] Event loop: Coro3 yielded', 'output-asyncio');
+            }, 500);
+
+            setTimeout(() => {
+                addOutput('demo-output', '[1.0s] Event loop: URL1 IO done → Resume Coro1', 'output-asyncio');
+            }, 1500);
+
+            setTimeout(() => {
+                addOutput('demo-output', '[1.0s] Coro1 completed', 'output-success');
+                addOutput('demo-output', '[1.0s] Event loop: URL2 IO done → Resume Coro2', 'output-asyncio');
+            }, 1700);
+
+            setTimeout(() => {
+                addOutput('demo-output', '[1.0s] Coro2 completed', 'output-success');
+                addOutput('demo-output', '[1.0s] All coroutines done', 'output-success');
+                addOutput('demo-output', '', 'output-asyncio');
+                addOutput('demo-output', '⏱️  Total Time: ~1.0s (concurrent)', 'output-success');
+                addOutput('demo-output', '📊 1 thread, 5 coroutines, event loop managed', 'output-asyncio');
+            }, 1900);
+        }
+
+        function runSequentialDemo() {
+            const output = document.getElementById('demo-output');
+            output.innerHTML = '';
+
+            addOutput('demo-output', '🔄 Sequential Demo: 5 URLs (1s each)', 'output-warning');
+
+            setTimeout(() => {
+                addOutput('demo-output', '[0.0s] Fetching URL1...', 'output-warning');
+                addOutput('demo-output', '[1.0s] URL1 done', 'output-success');
+                addOutput('demo-output', '[1.0s] Fetching URL2...', 'output-warning');
+            }, 500);
+
+            setTimeout(() => {
+                addOutput('demo-output', '[2.0s] URL2 done', 'output-success');
+                addOutput('demo-output', '[2.0s] Fetching URL3...', 'output-warning');
+            }, 1700);
+
+            setTimeout(() => {
+                addOutput('demo-output', '[3.0s] URL3 done', 'output-success');
+                addOutput('demo-output', '[3.0s] Fetching URL4...', 'output-warning');
+            }, 2900);
+
+            setTimeout(() => {
+                addOutput('demo-output', '[4.0s] URL4 done', 'output-success');
+                addOutput('demo-output', '[4.0s] Fetching URL5...', 'output-warning');
+            }, 4100);
+
+            setTimeout(() => {
+                addOutput('demo-output', '[5.0s] URL5 done', 'output-success');
+                addOutput('demo-output', '', 'output-warning');
+                addOutput('demo-output', '⏱️  Total Time: ~5.0s (no concurrency)', 'output-warning');
+                addOutput('demo-output', '❌ No parallelism, just waiting', 'output-warning');
+            }, 5300);
+        }
+
+        function scalabilityTest(model, count) {
+            const output = document.getElementById('scale-output');
+            output.innerHTML = '';
+
+            const memoryPerUnit = model === 'threading' ? 2 : 0.05;
+            const totalMemory = (memoryPerUnit * count).toFixed(1);
+
+            addOutput('scale-output', `${model.toUpperCase()}: ${count} concurrent units`, model === 'threading' ? 'output-threading' : 'output-asyncio');
+            addOutput('scale-output', `Estimated memory: ~${totalMemory} MB`, 'output-info');
+
+            if (model === 'threading') {
+                if (count <= 100) {
+                    addOutput('scale-output', '✓ Practical and manageable', 'output-success');
+                } else if (count <= 500) {
+                    addOutput('scale-output', '⚠️  Getting heavy, might be slow', 'output-warning');
+                } else {
+                    addOutput('scale-output', '❌ Not practical, consider asyncio', 'output-error');
+                }
+            } else {
+                addOutput('scale-output', '✓ Excellent scalability', 'output-success');
+                if (count >= 10000) {
+                    addOutput('scale-output', '⚠️  Still manageable but getting large', 'output-warning');
+                }
+            }
+
+            addOutput('scale-output', '', 'output-info');
+            addOutput('scale-output', `Context switch overhead: ${model === 'threading' ? 'HIGH' : 'LOW'}`, 'output-info');
+            addOutput('scale-output', `Concurrent execution: ${model === 'threading' ? 'Multi-core (if available)' : 'Single thread (event-loop managed)'}`, 'output-info');
+        }
+
+        function simulateIO(type) {
+            const output = document.getElementById('demo-output');
+            output.innerHTML = '';
+
+            if (type === 'sequential') {
+                addOutput('demo-output', '🔄 Sequential: 3 requests, 1s each', 'output-warning');
+                setTimeout(() => {
+                    addOutput('demo-output', '[0.0s] Request 1...', 'output-warning');
+                    addOutput('demo-output', '[1.0s] Request 1 done ✓', 'output-success');
+                }, 500);
+                setTimeout(() => {
+                    addOutput('demo-output', '[1.0s] Request 2...', 'output-warning');
+                    addOutput('demo-output', '[2.0s] Request 2 done ✓', 'output-success');
+                }, 1700);
+                setTimeout(() => {
+                    addOutput('demo-output', '[2.0s] Request 3...', 'output-warning');
+                    addOutput('demo-output', '[3.0s] Request 3 done ✓', 'output-success');
+                    addOutput('demo-output', '⏱️  Total: 3.0s', 'output-warning');
+                }, 2900);
+            } else if (type === 'threading') {
+                addOutput('demo-output', '🧵 Threading: 3 requests, 1s each', 'output-threading');
+                setTimeout(() => {
+                    addOutput('demo-output', '[0.0s] T1, T2, T3 all start', 'output-threading');
+                    addOutput('demo-output', '[0.0s] All waiting on IO...', 'output-threading');
+                }, 500);
+                setTimeout(() => {
+                    addOutput('demo-output', '[1.0s] All requests done ✓', 'output-success');
+                    addOutput('demo-output', '⏱️  Total: 1.0s (concurrent!)', 'output-success');
+                }, 1700);
+            } else {
+                addOutput('demo-output', '⚡ Asyncio: 3 requests, 1s each', 'output-asyncio');
+                setTimeout(() => {
+                    addOutput('demo-output', '[0.0ms] Coro1 awaits', 'output-asyncio');
+                    addOutput('demo-output', '[0.1ms] Coro2 awaits', 'output-asyncio');
+                    addOutput('demo-output', '[0.2ms] Coro3 awaits', 'output-asyncio');
+                    addOutput('demo-output', '[0.2ms] Event loop checks IO...', 'output-asyncio');
+                }, 500);
+                setTimeout(() => {
+                    addOutput('demo-output', '[1.0s] All IO done ✓', 'output-success');
+                    addOutput('demo-output', '⏱️  Total: 1.0s (concurrent!)', 'output-success');
+                    addOutput('demo-output', '📊 Single thread, multiple coroutines', 'output-asyncio');
+                }, 1700);
+            }
+        }
+    </script>
+</body>
+</html>
