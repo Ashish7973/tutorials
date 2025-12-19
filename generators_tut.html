@@ -1,0 +1,1748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Generators - Complete Technical Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #f59e0b;
+            --secondary: #d97706;
+            --success: #10b981;
+            --warning: #ef4444;
+            --danger: #dc2626;
+            --info: #3b82f6;
+            --dark-bg: #0f172a;
+            --light-bg: #1e293b;
+            --card-bg: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --border: #475569;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #1a293e 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        nav {
+            position: sticky;
+            top: 0;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            z-index: 100;
+            padding: 1rem 0;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .nav-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 4rem 0;
+            margin-bottom: 3rem;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .hero .tagline {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: linear-gradient(135deg, rgba(51, 65, 85, 0.5) 0%, rgba(30, 41, 59, 0.5) 100%);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.15);
+        }
+
+        .card h2 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+        }
+
+        .card h3 {
+            color: var(--primary);
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 1rem;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: 2px solid var(--border);
+            color: var(--text-secondary);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .tab-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .definition {
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 4px solid var(--primary);
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 6px;
+        }
+
+        .code-block {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+
+        .code-block code {
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        .highlight {
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 4px solid var(--warning);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+            color: var(--text-secondary);
+        }
+
+        .key-points {
+            background: rgba(245, 158, 11, 0.05);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .key-points h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .key-points ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .key-points li {
+            padding: 0.5rem 0;
+            padding-left: 2rem;
+            position: relative;
+            color: var(--text-secondary);
+        }
+
+        .key-points li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .side-box {
+            background: rgba(51, 65, 85, 0.5);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .side-box h4 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .step-timeline {
+            position: relative;
+            padding: 2rem 0;
+        }
+
+        .step-item {
+            padding-left: 3rem;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .step-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 20px;
+            height: 20px;
+            background: var(--primary);
+            border-radius: 50%;
+            border: 3px solid var(--dark-bg);
+        }
+
+        .step-item::after {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 20px;
+            width: 4px;
+            height: calc(100% + 2rem);
+            background: var(--border);
+        }
+
+        .step-item:last-child::after {
+            display: none;
+        }
+
+        .step-item strong {
+            color: var(--primary);
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        button:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+
+        .output {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+            min-height: 200px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            max-height: 400px;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .comparison-table th {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--primary);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .comparison-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            margin-right: 0.5rem;
+        }
+
+        .badge-good {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        .badge-bad {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--warning);
+        }
+
+        .memory-diagram {
+            background: rgba(51, 65, 85, 0.5);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .frame-box {
+            background: rgba(245, 158, 11, 0.1);
+            border: 2px solid var(--primary);
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 3rem 0;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border);
+            margin-top: 4rem;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+
+            .nav-links {
+                gap: 0.5rem;
+                font-size: 0.8rem;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                gap: 0.3rem;
+            }
+
+            .tab-btn {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.8rem;
+            }
+        }
+
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1.5rem 0;
+            flex-wrap: wrap;
+        }
+
+        .flow-box {
+            background: rgba(245, 158, 11, 0.1);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .flow-arrow {
+            font-size: 1.5rem;
+            color: var(--primary);
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        table th, table td {
+            border: 1px solid var(--border);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        table th {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--primary);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <div class="nav-title">🐍 Python Generators</div>
+            <ul class="nav-links">
+                <li><a onclick="scrollTo('intro')">Intro</a></li>
+                <li><a onclick="scrollTo('basics')">Basics</a></li>
+                <li><a onclick="scrollTo('internals')">Internals</a></li>
+                <li><a onclick="scrollTo('memory')">Memory</a></li>
+                <li><a onclick="scrollTo('advanced')">Advanced</a></li>
+                <li><a onclick="scrollTo('production')">Production</a></li>
+                <li><a onclick="scrollTo('demo')">Demo</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Hero -->
+        <section class="hero">
+            <h1>Python Generators Explained</h1>
+            <p class="tagline">Complete Technical Guide: From Basics to Production Implementation</p>
+        </section>
+
+        <!-- Introduction -->
+        <section id="intro" class="card">
+            <h2>🎯 What is a Generator?</h2>
+
+            <div class="definition">
+                <strong>Generator:</strong> A special function that uses the `yield` keyword to return values one at a time. Instead of computing all values at once and storing them in memory, generators compute values on-the-fly (lazy evaluation) and resume from where they left off.
+            </div>
+
+            <h3>Key Characteristics:</h3>
+            <ul style="margin-left: 2rem; margin-top: 1rem;">
+                <li>✅ <strong>Memory Efficient:</strong> Only stores one value at a time in memory</li>
+                <li>✅ <strong>Lazy Evaluation:</strong> Computes values only when needed</li>
+                <li>✅ <strong>State Preservation:</strong> Remembers local variables between yields</li>
+                <li>✅ <strong>Pauseable Functions:</strong> Can pause and resume execution</li>
+                <li>✅ <strong>Infinite Sequences:</strong> Can represent infinite sequences without memory overflow</li>
+            </ul>
+
+            <h3>Simple Example:</h3>
+            <div class="code-block"><pre><code>
+# Regular function with return (all at once)
+def get_numbers_list():
+    result = []
+    for i in range(5):
+        result.append(i)
+    return result  # Returns all at once: [0, 1, 2, 3, 4]
+
+# Generator function with yield (one at a time)
+def get_numbers_generator():
+    for i in range(5):
+        yield i  # Yields one at a time: 0, then 1, then 2...
+
+# Usage
+list_result = get_numbers_list()  # All 5 computed immediately
+gen_result = get_numbers_generator()  # Nothing computed yet!
+
+for num in gen_result:
+    print(num)  # Computes one per iteration
+            </code></pre></div>
+
+            <div class="highlight">
+                <strong>Key Insight:</strong> When you call a generator function, it doesn't execute immediately. Instead, it returns a generator object. The function body only executes when you call `next()` or iterate over it.
+            </div>
+        </section>
+
+        <!-- Basics -->
+        <section id="basics" class="card">
+            <h2>📚 Generator Basics</h2>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab(event, 'basics-syntax')">Syntax</button>
+                <button class="tab-btn" onclick="switchTab(event, 'basics-iteration')">Iteration</button>
+                <button class="tab-btn" onclick="switchTab(event, 'basics-vs-list')">vs Lists</button>
+            </div>
+
+            <!-- Syntax Tab -->
+            <div id="basics-syntax" class="tab-content active">
+                <h3>Basic Syntax:</h3>
+
+                <div class="code-block"><pre><code>
+def my_generator():
+    """A simple generator function"""
+    yield 1
+    yield 2
+    yield 3
+
+# Create generator object (doesn't execute yet)
+gen = my_generator()
+print(type(gen))  # &lt;class 'generator'&gt;
+
+# Iterate to get values
+for value in gen:
+    print(value)  # 1, 2, 3
+                </code></pre></div>
+
+                <h3>Multiple Yields:</h3>
+
+                <div class="code-block"><pre><code>
+def count_to_n(n):
+    i = 0
+    while i < n:
+        yield i  # Pause here, return i to caller
+        i += 1   # Resume from here next time
+
+# Usage
+for num in count_to_n(3):
+    print(num)  # 0, 1, 2
+
+# Using next() explicitly
+gen = count_to_n(3)
+print(next(gen))  # 0
+print(next(gen))  # 1
+print(next(gen))  # 2
+print(next(gen))  # StopIteration exception
+                </code></pre></div>
+
+                <h3>Generator Expressions:</h3>
+
+                <div class="code-block"><pre><code>
+# List comprehension (creates list immediately)
+squares_list = [x**2 for x in range(5)]
+
+# Generator expression (lazy evaluation)
+squares_gen = (x**2 for x in range(5))
+
+# Both work the same in iteration, but gen uses less memory
+for square in squares_gen:
+    print(square)  # 0, 1, 4, 9, 16
+                </code></pre></div>
+            </div>
+
+            <!-- Iteration Tab -->
+            <div id="basics-iteration" class="tab-content">
+                <h3>Ways to Iterate:</h3>
+
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Method</th>
+                            <th>Usage</th>
+                            <th>Example</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>for loop</strong></td>
+                            <td>Most common, automatic iteration</td>
+                            <td><pre><code>for x in generator: print(x)</code></pre></td>
+                        </tr>
+                        <tr>
+                            <td><strong>next()</strong></td>
+                            <td>Get next value, raises StopIteration when done</td>
+                            <td><pre><code>value = next(gen)</code></pre></td>
+                        </tr>
+                        <tr>
+                            <td><strong>list()</strong></td>
+                            <td>Convert all values to list (uses memory!)</td>
+                            <td><pre><code>all_values = list(gen)</code></pre></td>
+                        </tr>
+                        <tr>
+                            <td><strong>sum()</strong></td>
+                            <td>Aggregate without creating list</td>
+                            <td><pre><code>total = sum(gen)</code></pre></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Complete Example:</h3>
+
+                <div class="code-block"><pre><code>
+def fibonacci(limit):
+    a, b = 0, 1
+    while a < limit:
+        yield a
+        a, b = b, a + b
+
+# Method 1: for loop
+print("Using for loop:")
+for num in fibonacci(50):
+    print(num, end=' ')  # 0 1 1 2 3 5 8 13 21 34
+
+# Method 2: next() with exception handling
+print("\nUsing next():")
+gen = fibonacci(50)
+while True:
+    try:
+        print(next(gen), end=' ')
+    except StopIteration:
+        break
+
+# Method 3: Convert to list (all at once)
+print("\nUsing list():")
+all_fibs = list(fibonacci(50))
+                </code></pre></div>
+            </div>
+
+            <!-- vs Lists Tab -->
+            <div id="basics-vs-list" class="tab-content">
+                <h3>Generators vs Lists Comparison:</h3>
+
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th>List</th>
+                            <th>Generator</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Memory Usage</strong></td>
+                            <td class="badge-bad">Stores all items</td>
+                            <td class="badge-good">Stores one item at a time</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Creation Time</strong></td>
+                            <td class="badge-bad">Slow (must compute all)</td>
+                            <td class="badge-good">Instant (no computation)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Access Pattern</strong></td>
+                            <td class="badge-good">Random access (indexing)</td>
+                            <td class="badge-bad">Sequential only</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Infinite Sequences</strong></td>
+                            <td class="badge-bad">Impossible</td>
+                            <td class="badge-good">Possible</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Reusability</strong></td>
+                            <td class="badge-good">Multiple iterations</td>
+                            <td class="badge-bad">Single use (exhausts)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>List Methods</strong></td>
+                            <td class="badge-good">sort(), reverse(), etc.</td>
+                            <td class="badge-bad">No built-in methods</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Memory Comparison Example:</h3>
+
+                <div class="code-block"><pre><code>
+import sys
+
+# List: stores all 1 million numbers
+list_comp = [i for i in range(1000000)]
+print(f"List size: {sys.getsizeof(list_comp)} bytes")  # ~8-9 MB
+
+# Generator: stores nothing
+gen_exp = (i for i in range(1000000))
+print(f"Generator size: {sys.getsizeof(gen_exp)} bytes")  # ~128 bytes
+
+# 100x less memory! 🎉
+                </code></pre></div>
+            </div>
+        </section>
+
+        <!-- Internals -->
+        <section id="internals" class="card">
+            <h2>🔧 Generator Internals (Deep Dive)</h2>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab(event, 'internals-how')">How It Works</button>
+                <button class="tab-btn" onclick="switchTab(event, 'internals-frame')">Frame Objects</button>
+                <button class="tab-btn" onclick="switchTab(event, 'internals-bytecode')">Bytecode</button>
+            </div>
+
+            <!-- How It Works Tab -->
+            <div id="internals-how" class="tab-content active">
+                <h3>Generator Execution Flow:</h3>
+
+                <div class="step-timeline">
+                    <div class="step-item">
+                        <strong>1. Function Definition</strong><br>
+                        <span style="color: var(--text-secondary);">Python recognizes `yield` keyword and marks function as generator</span>
+                    </div>
+
+                    <div class="step-item">
+                        <strong>2. Function Call</strong><br>
+                        <span style="color: var(--text-secondary);">Function doesn't execute! Returns generator object immediately</span>
+                    </div>
+
+                    <div class="step-item">
+                        <strong>3. first next() Call</strong><br>
+                        <span style="color: var(--text-secondary);">Execution starts, code runs until first `yield`</span>
+                    </div>
+
+                    <div class="step-item">
+                        <strong>4. Yield Returns Value</strong><br>
+                        <span style="color: var(--text-secondary);">Value yielded to caller, execution pauses, state saved</span>
+                    </div>
+
+                    <div class="step-item">
+                        <strong>5. Second next() Call</strong><br>
+                        <span style="color: var(--text-secondary);">Execution resumes from where it paused, picks up from right after yield</span>
+                    </div>
+
+                    <div class="step-item">
+                        <strong>6. Repeat</strong><br>
+                        <span style="color: var(--text-secondary);">Steps 4-5 repeat until function ends or explicit return</span>
+                    </div>
+
+                    <div class="step-item">
+                        <strong>7. StopIteration</strong><br>
+                        <span style="color: var(--text-secondary);">When function ends, `StopIteration` exception is raised</span>
+                    </div>
+                </div>
+
+                <h3>Visual Flow:</h3>
+
+                <div class="memory-diagram">
+                    <div style="text-align: center; margin-bottom: 1.5rem;">
+                        <strong style="color: var(--primary);">Generator Lifecycle</strong>
+                    </div>
+
+                    <div class="code-block" style="background: rgba(245, 158, 11, 0.05);">
+                        <code>
+def counter():
+    print("START")
+    yield 1        # Point A
+    print("MIDDLE")
+    yield 2        # Point B
+    print("END")
+
+gen = counter()        # No output yet!
+print(next(gen))       # Prints: START, 1
+print(next(gen))       # Prints: MIDDLE, 2
+print(next(gen))       # Prints: END, StopIteration
+                        </code>
+                    </div>
+                </div>
+
+                <div class="highlight">
+                    <strong>Key Understanding:</strong> The function doesn't execute continuously. It's paused at `yield` and resumed exactly from that point. Local variables are preserved between yields!
+                </div>
+            </div>
+
+            <!-- Frame Objects Tab -->
+            <div id="internals-frame" class="tab-content">
+                <h3>Frame Objects (The Magic):</h3>
+
+                <div class="definition">
+                    <strong>Frame Object:</strong> A Python object that contains execution state of a function. For generators, the frame is preserved on the heap instead of being destroyed, allowing resumption.
+                </div>
+
+                <h3>Frame Contents:</h3>
+
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Field</th>
+                            <th>Purpose</th>
+                            <th>Example</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>f_lasti</strong></td>
+                            <td>Last instruction pointer (bytecode offset)</td>
+                            <td>Points to next bytecode to execute</td>
+                        </tr>
+                        <tr>
+                            <td><strong>f_locals</strong></td>
+                            <td>Local variables dictionary</td>
+                            <td>`{'x': 5, 'y': 10}`</td>
+                        </tr>
+                        <tr>
+                            <td><strong>f_globals</strong></td>
+                            <td>Global variables dictionary</td>
+                            <td>Module-level variables</td>
+                        </tr>
+                        <tr>
+                            <td><strong>f_builtins</strong></td>
+                            <td>Built-in namespace</td>
+                            <td>`print`, `len`, etc.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Stack</strong></td>
+                            <td>Value stack for operations</td>
+                            <td>Operands for bytecode instructions</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Generator vs Regular Function:</h3>
+
+                <div class="memory-diagram">
+                    <div style="margin-bottom: 1rem;">
+                        <h4 style="color: var(--primary); margin-bottom: 0.5rem;">Regular Function</h4>
+                        <div class="frame-box">
+Frame Created → Code Executes → Return → Frame DESTROYED ❌
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 style="color: var(--primary); margin-bottom: 0.5rem;">Generator Function</h4>
+                        <div class="frame-box">
+Frame Created → Code Runs to Yield → Frame PRESERVED ✅
+                        </div>
+                        <div class="frame-box" style="margin-top: 0.5rem;">
+Resume → Code Continues → Next Yield → Frame PRESERVED ✅
+                        </div>
+                        <div class="frame-box" style="margin-top: 0.5rem;">
+... (repeat) ... → Function Ends → Frame DESTROYED ❌
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Inspect Generator Frame:</h3>
+
+                <div class="code-block"><pre><code>
+import inspect
+
+def my_gen():
+    x = 10
+    y = 20
+    yield x + y
+    z = 30
+    yield x + y + z
+
+gen = my_gen()
+print(gen.gi_frame)  # &lt;frame object at 0x...&gt;
+print(gen.gi_code)   # &lt;code object at 0x...&gt;
+
+# Execute once
+next(gen)
+
+# Check frame state
+frame = gen.gi_frame
+print(f"Locals: {frame.f_locals}")  # {'x': 10, 'y': 20}
+print(f"Instruction: {frame.f_lasti}")  # Bytecode offset
+print(f"Code: {frame.f_code.co_name}")  # 'my_gen'
+                </code></pre></div>
+            </div>
+
+            <!-- Bytecode Tab -->
+            <div id="internals-bytecode" class="tab-content">
+                <h3>Bytecode Behind Generators:</h3>
+
+                <div class="code-block"><pre><code>
+import dis
+
+def simple_gen():
+    yield 1
+    yield 2
+
+# See the bytecode instructions
+dis.dis(simple_gen)
+                </code></pre></div>
+
+                <div style="background: rgba(0, 0, 0, 0.2); border-left: 4px solid var(--primary); padding: 1rem; margin: 1rem 0; border-radius: 4px;">
+                    <code style="font-size: 0.8rem;"><pre>
+Disassembly of simple_gen:
+  2           0 LOAD_CONST               1 (1)
+              2 YIELD_VALUE
+              4 POP_TOP
+
+  3           6 LOAD_CONST               2 (2)
+              8 YIELD_VALUE
+             10 POP_TOP
+             12 LOAD_CONST               0 (None)
+             14 RETURN_VALUE
+                    </pre></code>
+                </div>
+
+                <h3>Key Bytecode Instructions:</h3>
+
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Instruction</th>
+                            <th>Meaning</th>
+                            <th>Effect</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>YIELD_VALUE</strong></td>
+                            <td>Yield current value</td>
+                            <td>Pauses execution, returns value, saves state</td>
+                        </tr>
+                        <tr>
+                            <td><strong>LOAD_CONST</strong></td>
+                            <td>Push constant to stack</td>
+                            <td>Loads a literal value</td>
+                        </tr>
+                        <tr>
+                            <td><strong>POP_TOP</strong></td>
+                            <td>Pop value from stack</td>
+                            <td>Discards top value</td>
+                        </tr>
+                        <tr>
+                            <td><strong>JUMP_ABSOLUTE</strong></td>
+                            <td>Jump to bytecode offset</td>
+                            <td>Loop control</td>
+                        </tr>
+                        <tr>
+                            <td><strong>RETURN_VALUE</strong></td>
+                            <td>Return from function</td>
+                            <td>Raises StopIteration for generators</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="highlight">
+                    <strong>YIELD_VALUE Magic:</strong> Unlike `return`, `YIELD_VALUE` doesn't destroy the frame. Instead, it:
+                    1. Returns value to caller
+                    2. Saves f_lasti (instruction pointer)
+                    3. Saves all local variables
+                    4. Pauses execution
+                </div>
+            </div>
+        </section>
+
+        <!-- Memory Efficiency -->
+        <section id="memory" class="card">
+            <h2>💾 Memory Efficiency Analysis</h2>
+
+            <h3>Why Generators Save Memory:</h3>
+
+            <div class="memory-diagram">
+                <div style="margin-bottom: 2rem;">
+                    <h4 style="color: var(--primary); margin-bottom: 1rem;">❌ Lists (Eager Evaluation)</h4>
+                    <div style="background: rgba(239, 68, 68, 0.1); border: 2px solid var(--warning); border-radius: 6px; padding: 1rem;">
+                        <code style="font-size: 0.9rem;">
+numbers = [i for i in range(1000000)]<br>
+<br>
+Memory State:<br>
+RAM: [0, 1, 2, 3, ... 999999] ← ALL stored at once<br>
+Size: ~8-9 MB<br>
+                        </code>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 style="color: var(--primary); margin-bottom: 1rem;">✅ Generators (Lazy Evaluation)</h4>
+                    <div style="background: rgba(16, 185, 129, 0.1); border: 2px solid var(--success); border-radius: 6px; padding: 1rem;">
+                        <code style="font-size: 0.9rem;">
+numbers = (i for i in range(1000000))<br>
+<br>
+Memory State:<br>
+RAM: Generator object (frame + state) ← Only ONE value at a time<br>
+Size: ~128 bytes<br>
+<br>
+When iterating:<br>
+RAM: [0] → [1] → [2] → [3] → ... (one at a time)<br>
+                        </code>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Real-World Memory Comparison:</h3>
+
+            <div class="code-block"><pre><code>
+import sys
+import timeit
+
+# Create 1 million numbers
+size = 1_000_000
+
+# List approach
+def with_list():
+    data = [i**2 for i in range(size)]
+    return sum(data)
+
+# Generator approach
+def with_generator():
+    data = (i**2 for i in range(size))
+    return sum(data)
+
+# Memory Usage
+list_obj = [i for i in range(size)]
+gen_obj = (i for i in range(size))
+
+print(f"List size: {sys.getsizeof(list_obj):,} bytes")
+print(f"Generator size: {sys.getsizeof(gen_obj)} bytes")
+print(f"Difference: {sys.getsizeof(list_obj) / sys.getsizeof(gen_obj)}x")
+
+# Speed Comparison
+list_time = timeit.timeit(with_list, number=5)
+gen_time = timeit.timeit(with_generator, number=5)
+
+print(f"\nList time: {list_time:.4f}s")
+print(f"Generator time: {gen_time:.4f}s")
+print(f"Generator is {list_time/gen_time:.2f}x faster")
+            </code></pre></div>
+
+            <div class="key-points">
+                <h3>Memory Usage Rules:</h3>
+                <ul>
+                    <li><strong>List:</strong> O(n) memory - stores all n items</li>
+                    <li><strong>Generator:</strong> O(1) memory - stores only current item + frame</li>
+                    <li><strong>List advantage:</strong> Can access items multiple times, supports indexing</li>
+                    <li><strong>Generator advantage:</strong> Works with infinite sequences, uses minimal memory</li>
+                    <li><strong>Break-even point:</strong> When n > ~1000 items, generator usually wins</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Advanced Features -->
+        <section id="advanced" class="card">
+            <h2>⚡ Advanced Generator Features</h2>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab(event, 'advanced-send')">send()</button>
+                <button class="tab-btn" onclick="switchTab(event, 'advanced-throw')">throw()</button>
+                <button class="tab-btn" onclick="switchTab(event, 'advanced-close')">close()</button>
+            </div>
+
+            <!-- send() Tab -->
+            <div id="advanced-send" class="tab-content active">
+                <h3>The send() Method (Bidirectional Communication):</h3>
+
+                <div class="definition">
+                    <strong>send():</strong> Allows you to send a value into a generator at the point where it's paused. The yielded expression receives this value!
+                </div>
+
+                <h3>Basic Example:</h3>
+
+                <div class="code-block"><pre><code>
+def echo_gen():
+    while True:
+        value = yield  # Receive value here
+        print(f"Received: {value}")
+
+gen = echo_gen()
+next(gen)  # Prime the generator (move to first yield)
+
+gen.send("Hello")   # "Received: Hello"
+gen.send("World")   # "Received: World"
+gen.send(42)        # "Received: 42"
+                </code></pre></div>
+
+                <h3>Advanced Example - Fibonacci Control:</h3>
+
+                <div class="code-block"><pre><code>
+def fibonacci_control():
+    a, b = 0, 1
+    while True:
+        # yield returns the next fib, receives multiplier
+        multiplier = (yield a)
+
+        if multiplier is None:
+            multiplier = 1
+
+        a, b = b, a + b
+        a *= multiplier  # Apply multiplier
+
+gen = fibonacci_control()
+print(next(gen))              # 0
+print(gen.send(2))            # Send 2 (double the next)
+print(gen.send(3))            # Send 3 (triple the next)
+                </code></pre></div>
+
+                <h3>Use Cases:</h3>
+                <ul style="margin-left: 2rem; margin-top: 1rem;">
+                    <li>🎮 Game loop control (send game events to generator)</li>
+                    <li>🔄 Coroutines (bidirectional data flow)</li>
+                    <li>🎛️ State machines (send state transitions)</li>
+                    <li>📊 Pipeline stages (send data between stages)</li>
+                </ul>
+            </div>
+
+            <!-- throw() Tab -->
+            <div id="advanced-throw" class="tab-content">
+                <h3>The throw() Method (Exception Injection):</h3>
+
+                <div class="definition">
+                    <strong>throw():</strong> Inject an exception into the generator at the yield point. The generator can catch and handle it!
+                </div>
+
+                <h3>Example:</h3>
+
+                <div class="code-block"><pre><code>
+def error_handler():
+    try:
+        while True:
+            yield "Working..."
+    except ValueError as e:
+        yield f"Caught error: {e}"
+    except KeyboardInterrupt:
+        yield "Interrupted!"
+
+gen = error_handler()
+print(next(gen))                           # Working...
+print(gen.throw(ValueError("Invalid")))    # Caught error: Invalid
+                </code></pre></div>
+
+                <h3>Use Cases:</h3>
+                <ul style="margin-left: 2rem; margin-top: 1rem;">
+                    <li>🛡️ Error handling in pipelines</li>
+                    <li>⚡ Graceful shutdown (throw GeneratorExit)</li>
+                    <li>🔄 Retrying logic in generators</li>
+                </ul>
+            </div>
+
+            <!-- close() Tab -->
+            <div id="advanced-close" class="tab-content">
+                <h3>The close() Method (Cleanup):</h3>
+
+                <div class="definition">
+                    <strong>close():</strong> Terminates the generator and throws GeneratorExit at the yield point, allowing cleanup code.
+                </div>
+
+                <h3>Example:</h3>
+
+                <div class="code-block"><pre><code>
+def file_reader(filename):
+    f = open(filename, 'r')
+    try:
+        for line in f:
+            yield line.strip()
+    finally:
+        print("Closing file...")
+        f.close()
+
+gen = file_reader('data.txt')
+print(next(gen))   # Read first line
+gen.close()        # Cleanup: "Closing file..."
+                </code></pre></div>
+
+                <h3>Use Cases:</h3>
+                <ul style="margin-left: 2rem; margin-top: 1rem;">
+                    <li>🔒 Resource cleanup (files, connections, locks)</li>
+                    <li>🧹 Finalization logic</li>
+                    <li>🔌 Connection teardown</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Production Example -->
+        <section id="production" class="card">
+            <h2>🚀 Production Example: File Upload Handler</h2>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab(event, 'prod-overview')">Overview</button>
+                <button class="tab-btn" onclick="switchTab(event, 'prod-code')">Code</button>
+                <button class="tab-btn" onclick="switchTab(event, 'prod-benefits')">Benefits</button>
+            </div>
+
+            <!-- Overview Tab -->
+            <div id="prod-overview" class="tab-content active">
+                <h3>Real-World Scenario: Processing Large Files</h3>
+
+                <div class="definition">
+                    <strong>Challenge:</strong> Upload a 1GB file to cloud storage. Reading entire file into memory = impossible. Solution: Process in chunks using generators!
+                </div>
+
+                <h3>Traditional Approach (❌ Problem):</h3>
+
+                <div class="code-block"><pre><code>
+# ❌ BAD: Loads entire 1GB file into memory
+def upload_file_bad(filename):
+    with open(filename, 'rb') as f:
+        data = f.read()  # 1GB → crashes if not enough RAM!
+
+    # Upload
+    send_to_cloud(data)
+                </code></pre></div>
+
+                <h3>Generator Approach (✅ Solution):</h3>
+
+                <div class="code-block"><pre><code>
+# ✅ GOOD: Process in 8KB chunks, constant memory
+def read_file_chunks(filename, chunk_size=8192):
+    with open(filename, 'rb') as f:
+        while True:
+            chunk = f.read(chunk_size)
+            if not chunk:
+                break
+            yield chunk
+
+# Usage
+for chunk in read_file_chunks('1gb_file.bin'):
+    send_to_cloud(chunk)  # Upload one chunk at a time
+    # Memory only holds one 8KB chunk at a time!
+                </code></pre></div>
+
+                <div class="highlight">
+                    <strong>Memory Difference:</strong><br>
+                    Traditional: 1 GB RAM used<br>
+                    Generator: 8 KB RAM used<br>
+                    <strong>1000x less memory!</strong>
+                </div>
+            </div>
+
+            <!-- Code Tab -->
+            <div id="prod-code" class="tab-content">
+                <h3>Complete File Upload System:</h3>
+
+                <div class="code-block"><pre><code>
+import hashlib
+import os
+from datetime import datetime
+from typing import Generator
+
+class CloudUploader:
+    """Production-grade file uploader using generators"""
+
+    def __init__(self, api_url: str, api_key: str):
+        self.api_url = api_url
+        self.api_key = api_key
+        self.chunk_size = 1024 * 1024  # 1MB chunks
+
+    def read_chunks(self, filepath: str) -> Generator[tuple, None, None]:
+        """
+        Read file in chunks
+        Yields: (chunk_number, chunk_data)
+        Memory: O(1) - only one chunk in memory at a time
+        """
+        file_size = os.path.getsize(filepath)
+        chunk_num = 0
+        bytes_read = 0
+
+        with open(filepath, 'rb') as f:
+            while True:
+                chunk = f.read(self.chunk_size)
+                if not chunk:
+                    break
+
+                chunk_num += 1
+                bytes_read += len(chunk)
+
+                # Show progress
+                progress = (bytes_read / file_size) * 100
+                print(f"Progress: {progress:.1f}%", end='\r')
+
+                yield chunk_num, chunk
+
+    def calculate_checksums(self, chunks: Generator) -> Generator[tuple, None, None]:
+        """
+        Pipeline stage: Calculate SHA256 for each chunk
+        Takes generator input, yields enriched data
+        """
+        for chunk_num, chunk_data in chunks:
+            chunk_hash = hashlib.sha256(chunk_data).hexdigest()
+            yield chunk_num, chunk_data, chunk_hash
+
+    def upload_chunks(self, enriched_chunks: Generator) -> Generator[dict, None, None]:
+        """
+        Pipeline stage: Upload chunks to cloud
+        Yields upload status
+        """
+        for chunk_num, chunk_data, chunk_hash in enriched_chunks:
+            try:
+                # Simulate API call
+                response = {
+                    'chunk_num': chunk_num,
+                    'size': len(chunk_data),
+                    'hash': chunk_hash,
+                    'timestamp': datetime.now().isoformat(),
+                    'status': 'uploaded'
+                }
+
+                # In real code:
+                # response = requests.post(
+                #     f'{self.api_url}/upload',
+                #     data=chunk_data,
+                #     headers={
+                #         'X-Chunk-Number': str(chunk_num),
+                #         'X-Chunk-Hash': chunk_hash,
+                #         'Authorization': f'Bearer {self.api_key}'
+                #     }
+                # )
+
+                yield response
+
+            except Exception as e:
+                yield {
+                    'chunk_num': chunk_num,
+                    'status': 'failed',
+                    'error': str(e)
+                }
+
+    def upload_file(self, filepath: str) -> Generator[dict, None, None]:
+        """
+        Main upload pipeline using generators
+        Chains multiple generator stages
+        """
+        # Stage 1: Read chunks
+        chunks = self.read_chunks(filepath)
+
+        # Stage 2: Calculate hashes
+        enriched = self.calculate_checksums(chunks)
+
+        # Stage 3: Upload
+        uploads = self.upload_chunks(enriched)
+
+        # Yield results
+        for result in uploads:
+            yield result
+
+# Usage:
+uploader = CloudUploader('https://api.cloud.com', 'secret-key')
+
+for result in uploader.upload_file('large_file.iso'):
+    print(f"Chunk {result['chunk_num']}: {result['status']}")
+                </code></pre></div>
+
+                <h3>Memory Profile:</h3>
+
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Operation</th>
+                            <th>Memory Used</th>
+                            <th>Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Read chunks</strong></td>
+                            <td>~1 MB</td>
+                            <td>Only one chunk in memory</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Calculate hash</strong></td>
+                            <td>+65 bytes</td>
+                            <td>SHA256 hash string</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Upload</strong></td>
+                            <td>+500 bytes</td>
+                            <td>Response object</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Total</strong></td>
+                            <td>~1.1 MB</td>
+                            <td>Constant regardless of file size!</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Benefits Tab -->
+            <div id="prod-benefits" class="tab-content">
+                <h3>Why Generators are Perfect Here:</h3>
+
+                <div class="grid-2">
+                    <div class="side-box">
+                        <h4>💾 Memory Efficient</h4>
+                        <p>1GB file uses only 1MB RAM. Constant memory regardless of file size.</p>
+                    </div>
+
+                    <div class="side-box">
+                        <h4>🔄 Pipeline Architecture</h4>
+                        <p>Chain generators for read → hash → upload. Each stage is independent.</p>
+                    </div>
+
+                    <div class="side-box">
+                        <h4>⚡ Lazy Evaluation</h4>
+                        <p>Upload doesn't wait for all chunks to be read. Starts immediately.</p>
+                    </div>
+
+                    <div class="side-box">
+                        <h4>📊 Progress Tracking</h4>
+                        <p>Yield intermediate results for real-time progress display.</p>
+                    </div>
+
+                    <div class="side-box">
+                        <h4>🛡️ Error Handling</h4>
+                        <p>Gracefully handle failures per chunk, not entire file.</p>
+                    </div>
+
+                    <div class="side-box">
+                        <h4>♻️ Resource Management</h4>
+                        <p>File automatically closes after reading (context manager).</p>
+                    </div>
+                </div>
+
+                <h3>Other Production Examples:</h3>
+
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Use Case</th>
+                            <th>Generator Benefit</th>
+                            <th>Memory Saved</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>CSV Processing</strong></td>
+                            <td>Read rows one-by-one</td>
+                            <td>100x (read 10M rows, not all in RAM)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Log Analysis</strong></td>
+                            <td>Stream log lines, apply filters</td>
+                            <td>100x (filter massive logs)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>API Pagination</strong></td>
+                            <td>Fetch pages on-demand</td>
+                            <td>50x (load one page at a time)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Database Queries</strong></td>
+                            <td>Lazy load results</td>
+                            <td>1000x (stream 1M rows)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Web Streaming</strong></td>
+                            <td>Stream response chunks</td>
+                            <td>100x (4K video to browser)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Demo Section -->
+        <section id="demo" class="card">
+            <h2>🎮 Interactive Demo</h2>
+
+            <div style="background: rgba(51, 65, 85, 0.5); border: 2px solid var(--border); border-radius: 8px; padding: 2rem; margin: 1.5rem 0;">
+                <h3 style="color: var(--primary); margin-bottom: 1rem;">Generator Live Demonstration</h3>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <h4 style="color: var(--text-secondary); margin-bottom: 0.5rem;">Test Different Generators:</h4>
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <button onclick="runCounterGen()">⏱️ Counter Generator</button>
+                        <button onclick="runFibonacciGen()">📊 Fibonacci Generator</button>
+                        <button onclick="runFileChunks()">📁 File Chunks Simulator</button>
+                        <button onclick="runSendExample()">📨 send() Example</button>
+                        <button onclick="clearDemoOutput()">🗑️ Clear Output</button>
+                    </div>
+                </div>
+
+                <div class="output" id="demoOutput">Output will appear here...</div>
+            </div>
+
+            <div style="background: rgba(51, 65, 85, 0.5); border: 2px solid var(--border); border-radius: 8px; padding: 2rem; margin-top: 1.5rem;">
+                <h3 style="color: var(--primary); margin-bottom: 1rem;">Memory Comparison</h3>
+
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+                    <button onclick="compareMemoryUsage()">📈 Compare List vs Generator</button>
+                </div>
+
+                <div class="output" id="memoryOutput">Run comparison to see memory usage...</div>
+            </div>
+        </section>
+
+        <!-- Key Takeaways -->
+        <section class="card">
+            <h2>📝 Key Takeaways</h2>
+
+            <div class="key-points">
+                <ul>
+                    <li><strong>Generator:</strong> Function with `yield` that returns values one at a time</li>
+                    <li><strong>Lazy Evaluation:</strong> Values computed only when needed, not all at once</li>
+                    <li><strong>Memory Efficient:</strong> O(1) memory instead of O(n), 100-1000x savings</li>
+                    <li><strong>Frame Preservation:</strong> Local variables saved between yields in frame object</li>
+                    <li><strong>Pauseable:</strong> Function pauses at yield, resumes from exact point</li>
+                    <li><strong>Bidirectional:</strong> Use `send()` to inject values into generators</li>
+                    <li><strong>Exception Handling:</strong> Use `throw()` to inject exceptions</li>
+                    <li><strong>Cleanup:</strong> Use `close()` or `finally` for resource cleanup</li>
+                    <li><strong>Production Use:</strong> Perfect for file I/O, streaming, pipelines</li>
+                    <li><strong>Limitations:</strong> Single-use, no indexing, can't reuse after exhaustion</li>
+                </ul>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>🐍 Python Generators Educational Hub | Master Memory-Efficient Code</p>
+        <p style="margin-top: 1rem; color: var(--text-secondary); font-size: 0.9rem;">
+            Understanding yield, frame objects, and production pipelines → Expert Python Skills 💡
+        </p>
+    </footer>
+
+    <script>
+        function switchTab(event, tabName) {
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(c => c.classList.remove('active'));
+
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(b => b.classList.remove('active'));
+
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function scrollTo(id) {
+            const element = document.getElementById(id);
+            element.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function addOutput(elementId, text, style = 'normal') {
+            const output = document.getElementById(elementId);
+            const line = document.createElement('div');
+
+            if (style === 'info') line.style.color = 'var(--primary)';
+            else if (style === 'success') line.style.color = 'var(--success)';
+            else if (style === 'error') line.style.color = 'var(--warning)';
+            else if (style === 'code') {
+                line.style.fontFamily = 'monospace';
+                line.style.fontSize = '0.9rem';
+            }
+
+            line.textContent = text;
+            output.appendChild(line);
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function clearDemoOutput() {
+            document.getElementById('demoOutput').innerHTML = '';
+            document.getElementById('memoryOutput').innerHTML = '';
+        }
+
+        function runCounterGen() {
+            const output = document.getElementById('demoOutput');
+            output.innerHTML = '';
+
+            addOutput('demoOutput', 'def counter(n):', 'code');
+            addOutput('demoOutput', '    for i in range(n):', 'code');
+            addOutput('demoOutput', '        yield i', 'code');
+            addOutput('demoOutput', '', 'normal');
+            addOutput('demoOutput', 'gen = counter(5)', 'info');
+            addOutput('demoOutput', 'for num in gen:', 'info');
+            addOutput('demoOutput', '    print(num)', 'info');
+            addOutput('demoOutput', '', 'normal');
+            addOutput('demoOutput', 'Output:', 'success');
+
+            function* counter(n) {
+                for (let i = 0; i < n; i++) {
+                    yield i;
+                }
+            }
+
+            for (let num of counter(5)) {
+                addOutput('demoOutput', num.toString(), 'code');
+            }
+
+            setTimeout(() => {
+                addOutput('demoOutput', '', 'normal');
+                addOutput('demoOutput', '✅ Generator finished (StopIteration)', 'success');
+            }, 500);
+        }
+
+        function runFibonacciGen() {
+            const output = document.getElementById('demoOutput');
+            output.innerHTML = '';
+
+            addOutput('demoOutput', 'def fibonacci(limit):', 'code');
+            addOutput('demoOutput', '    a, b = 0, 1', 'code');
+            addOutput('demoOutput', '    while a < limit:', 'code');
+            addOutput('demoOutput', '        yield a', 'code');
+            addOutput('demoOutput', '        a, b = b, a + b', 'code');
+            addOutput('demoOutput', '', 'normal');
+            addOutput('demoOutput', 'Fibonacci up to 100:', 'info');
+            addOutput('demoOutput', '', 'normal');
+
+            function* fibonacci(limit) {
+                let a = 0, b = 1;
+                while (a < limit) {
+                    yield a;
+                    [a, b] = [b, a + b];
+                }
+            }
+
+            let nums = [];
+            for (let num of fibonacci(100)) {
+                nums.push(num);
+            }
+            addOutput('demoOutput', nums.join(', '), 'code');
+        }
+
+        function runFileChunks() {
+            const output = document.getElementById('demoOutput');
+            output.innerHTML = '';
+
+            addOutput('demoOutput', '📁 Simulating File Upload (1GB in 1MB chunks)', 'info');
+            addOutput('demoOutput', '', 'normal');
+
+            function* readChunks(fileSize, chunkSize) {
+                let uploaded = 0;
+                let chunkNum = 0;
+                while (uploaded < fileSize) {
+                    const currentChunk = Math.min(chunkSize, fileSize - uploaded);
+                    uploaded += currentChunk;
+                    chunkNum++;
+                    const progress = (uploaded / fileSize * 100).toFixed(1);
+                    yield {chunkNum, size: currentChunk, progress};
+                }
+            }
+
+            const fileSize = 1024 * 1024 * 1024; // 1GB
+            const chunkSize = 1024 * 1024; // 1MB
+
+            let count = 0;
+            for (let chunk of readChunks(fileSize, chunkSize)) {
+                if (count % 256 === 0) { // Show every 256MB
+                    addOutput('demoOutput', `Chunk ${chunk.chunkNum}: ${chunk.progress}% uploaded`, 'code');
+                }
+                count++;
+            }
+
+            addOutput('demoOutput', '', 'normal');
+            addOutput('demoOutput', `✅ Upload complete! ${count} chunks processed`, 'success');
+            addOutput('demoOutput', `Memory used: ~1 MB (constant, not 1 GB!)`, 'success');
+        }
+
+        function runSendExample() {
+            const output = document.getElementById('demoOutput');
+            output.innerHTML = '';
+
+            addOutput('demoOutput', 'def echo_gen():', 'code');
+            addOutput('demoOutput', '    while True:', 'code');
+            addOutput('demoOutput', '        value = yield', 'code');
+            addOutput('demoOutput', '        print(f"Received: {value}")', 'code');
+            addOutput('demoOutput', '', 'normal');
+            addOutput('demoOutput', 'Using send():', 'info');
+            addOutput('demoOutput', '', 'normal');
+
+            function* echoGen() {
+                while (true) {
+                    const value = yield;
+                    yield `Received: ${value}`;
+                }
+            }
+
+            const gen = echoGen();
+            gen.next(); // Prime
+
+            const values = ['Hello', 'Python', 'Generators'];
+            for (let val of values) {
+                gen.next();
+                const result = gen.next(val);
+                if (!result.done) {
+                    addOutput('demoOutput', result.value, 'success');
+                }
+            }
+        }
+
+        function compareMemoryUsage() {
+            const output = document.getElementById('memoryOutput');
+            output.innerHTML = '';
+
+            addOutput('memoryOutput', 'Memory Comparison: List vs Generator', 'info');
+            addOutput('memoryOutput', '(Simulating with range 1,000,000)', 'normal');
+            addOutput('memoryOutput', '', 'normal');
+
+            // Simulate list (would be huge in real scenario)
+            const listSize = 8_000_000; // ~8MB for 1M integers
+            const generatorSize = 128; // ~128 bytes
+
+            addOutput('memoryOutput', `📊 List Memory: ${(listSize / 1024 / 1024).toFixed(1)} MB`, 'error');
+            addOutput('memoryOutput', `📊 Generator Memory: ${generatorSize} bytes`, 'success');
+            addOutput('memoryOutput', '', 'normal');
+            addOutput('memoryOutput', `🎯 Generator uses ${(listSize / generatorSize).toFixed(0)}x less memory!`, 'success');
+            addOutput('memoryOutput', '', 'normal');
+            addOutput('memoryOutput', 'Perfect for:', 'info');
+            addOutput('memoryOutput', '  • Large files (GB+)', 'normal');
+            addOutput('memoryOutput', '  • Infinite sequences', 'normal');
+            addOutput('memoryOutput', '  • Streaming data', 'normal');
+            addOutput('memoryOutput', '  • Real-time processing', 'normal');
+        }
+    </script>
+</body>
+</html>
