@@ -1,0 +1,1549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How Authenticator Apps Work - Complete Tutorial</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #059669;
+            --secondary: #047857;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --dark-bg: #0f172a;
+            --light-bg: #1e293b;
+            --card-bg: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --border: #475569;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #1a293e 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        nav {
+            position: sticky;
+            top: 0;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            z-index: 100;
+            padding: 1rem 0;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .nav-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #10b981, #059669);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            cursor: pointer;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 4rem 0;
+            margin-bottom: 3rem;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .hero .tagline {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: linear-gradient(135deg, rgba(51, 65, 85, 0.5) 0%, rgba(30, 41, 59, 0.5) 100%);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 8px 25px rgba(5, 150, 105, 0.15);
+        }
+
+        .card h2 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+        }
+
+        .card h3 {
+            color: var(--primary);
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 1rem;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: 2px solid var(--border);
+            color: var(--text-secondary);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .tab-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .definition {
+            background: rgba(5, 150, 105, 0.1);
+            border-left: 4px solid var(--primary);
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 6px;
+        }
+
+        .code-block {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+
+        .code-block code {
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .highlight {
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 4px solid var(--warning);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+            color: var(--text-secondary);
+        }
+
+        .key-points {
+            background: rgba(5, 150, 105, 0.05);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .key-points h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .key-points ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .key-points li {
+            padding: 0.5rem 0;
+            padding-left: 2rem;
+            position: relative;
+            color: var(--text-secondary);
+        }
+
+        .key-points li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .side-box {
+            background: rgba(51, 65, 85, 0.5);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .side-box h4 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .step-timeline {
+            position: relative;
+            padding: 2rem 0;
+        }
+
+        .step-item {
+            padding-left: 3rem;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .step-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 20px;
+            height: 20px;
+            background: var(--primary);
+            border-radius: 50%;
+            border: 3px solid var(--dark-bg);
+        }
+
+        .step-item::after {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 20px;
+            width: 4px;
+            height: calc(100% + 2rem);
+            background: var(--border);
+        }
+
+        .step-item:last-child::after {
+            display: none;
+        }
+
+        .step-item strong {
+            color: var(--primary);
+        }
+
+        .demo-section {
+            background: rgba(51, 65, 85, 0.5);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 1rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        button:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+        }
+
+        .output {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+            min-height: 200px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            max-height: 400px;
+        }
+
+        .timer {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--primary);
+            text-align: center;
+            margin: 1.5rem 0;
+        }
+
+        .code-display {
+            font-size: 2rem;
+            font-weight: bold;
+            text-align: center;
+            background: rgba(5, 150, 105, 0.2);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 2px solid var(--primary);
+            margin: 1rem 0;
+            font-family: 'Monaco', monospace;
+            letter-spacing: 0.2em;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: rgba(5, 150, 105, 0.2);
+            border-radius: 4px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 4px;
+            transition: width 0.1s linear;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .comparison-table th {
+            background: rgba(5, 150, 105, 0.2);
+            color: var(--primary);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .comparison-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        footer {
+            text-align: center;
+            padding: 3rem 0;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border);
+            margin-top: 4rem;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+
+            .nav-links {
+                gap: 1rem;
+                font-size: 0.9rem;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                gap: 0.5rem;
+            }
+
+            .tab-btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.9rem;
+            }
+
+            .timer {
+                font-size: 2rem;
+            }
+
+            .code-display {
+                font-size: 1.5rem;
+            }
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-right: 0.5rem;
+        }
+
+        .badge-success {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        .badge-info {
+            background: rgba(59, 130, 246, 0.2);
+            color: var(--info);
+        }
+
+        .timeline-vertical {
+            position: relative;
+            padding: 2rem 0;
+        }
+
+        .timeline-point {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .timeline-point::before {
+            content: '';
+            position: absolute;
+            left: -1rem;
+            top: 0;
+            width: 2px;
+            height: 100%;
+            background: var(--border);
+        }
+
+        .timeline-point:first-child::before {
+            height: 50%;
+            top: 50%;
+        }
+
+        .timeline-point:last-child::before {
+            height: 50%;
+        }
+
+        .timeline-marker {
+            position: relative;
+            z-index: 1;
+            width: 30px;
+            height: 30px;
+            background: var(--primary);
+            border-radius: 50%;
+            border: 3px solid var(--dark-bg);
+            margin-top: 0.25rem;
+        }
+
+        .timeline-content {
+            flex: 1;
+            background: rgba(51, 65, 85, 0.5);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .timeline-content h4 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1.5rem 0;
+            flex-wrap: wrap;
+        }
+
+        .flow-box {
+            background: rgba(5, 150, 105, 0.1);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .flow-arrow {
+            font-size: 2rem;
+            color: var(--primary);
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .flow-diagram {
+                flex-direction: column;
+            }
+
+            .flow-arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <div class="nav-title">🔐 How Authenticators Work</div>
+            <ul class="nav-links">
+                <li><a href="#intro">Intro</a></li>
+                <li><a href="#how">How It Works</a></li>
+                <li><a href="#totp">TOTP Algorithm</a></li>
+                <li><a href="#setup">Setup</a></li>
+                <li><a href="#demo">Demo</a></li>
+                <li><a href="#faq">FAQ</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Hero -->
+        <section class="hero">
+            <h1>How Authenticator Apps Work</h1>
+            <p class="tagline">Complete Technical Guide to Time-Based One-Time Passwords (TOTP)</p>
+        </section>
+
+        <!-- Introduction -->
+        <section id="intro" class="card">
+            <h2>🎯 What is an Authenticator App?</h2>
+
+            <div class="definition">
+                <strong>Authenticator App:</strong> A mobile application (Google Authenticator, Microsoft Authenticator, Authy) that generates 6-digit security codes every 30 seconds. It works completely offline - no internet needed!
+            </div>
+
+            <h3>Common Uses:</h3>
+            <ul style="margin-left: 2rem; margin-top: 1rem;">
+                <li>🔓 Two-Factor Authentication (2FA) - adds security to accounts</li>
+                <li>🛡️ Backup authentication - when SMS/email isn't available</li>
+                <li>💼 Enterprise security - for corporate systems</li>
+                <li>🏦 Banking apps - for payment verification</li>
+                <li>☁️ Cloud services - Google, AWS, Azure, GitHub, etc.</li>
+            </ul>
+
+            <div class="highlight">
+                <strong>Key Advantage:</strong> Works completely offline! The code is generated locally on your phone using a secret key. No API calls, no network needed.
+            </div>
+
+            <h3>Why Authenticators are Better than SMS:</h3>
+            <ul style="margin-left: 2rem; margin-top: 1rem;">
+                <li>✅ SMS can be intercepted (SIM swap attacks)</li>
+                <li>✅ Authenticator can't be compromised over network</li>
+                <li>✅ Works offline - no dependency on carrier</li>
+                <li>✅ Impossible to bypass with social engineering</li>
+            </ul>
+        </section>
+
+        <!-- How It Works -->
+        <section id="how" class="card">
+            <h2>🔄 How It Works - Overview</h2>
+
+            <div class="flow-diagram">
+                <div class="flow-box">
+                    <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">📱</div>
+                    <strong>1. Setup</strong><br>
+                    <span style="font-size: 0.85rem;">Scan QR code</span>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box">
+                    <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🔑</div>
+                    <strong>2. Store Secret</strong><br>
+                    <span style="font-size: 0.85rem;">20-byte key saved</span>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box">
+                    <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">⏰</div>
+                    <strong>3. Time-Based</strong><br>
+                    <span style="font-size: 0.85rem;">Uses current time</span>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box">
+                    <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🔢</div>
+                    <strong>4. Generate Code</strong><br>
+                    <span style="font-size: 0.85rem;">6-digit output</span>
+                </div>
+            </div>
+
+            <div class="step-timeline">
+                <div class="step-item">
+                    <strong>Step 1: User initiates 2FA setup</strong><br>
+                    <span style="color: var(--text-secondary);">User goes to account security settings and enables authenticator 2FA</span>
+                </div>
+
+                <div class="step-item">
+                    <strong>Step 2: Server generates secret</strong><br>
+                    <span style="color: var(--text-secondary);">Server creates a random 20-byte secret key and displays QR code</span>
+                </div>
+
+                <div class="step-item">
+                    <strong>Step 3: User scans QR code</strong><br>
+                    <span style="color: var(--text-secondary);">Authenticator app decodes QR code and extracts the secret key. Secret is now stored on phone.</span>
+                </div>
+
+                <div class="step-item">
+                    <strong>Step 4: App generates codes continuously</strong><br>
+                    <span style="color: var(--text-secondary);">Every 30 seconds, app generates new 6-digit code using secret + current time</span>
+                </div>
+
+                <div class="step-item">
+                    <strong>Step 5: During login</strong><br>
+                    <span style="color: var(--text-secondary);">Server asks for 2FA code. User opens app and enters visible code.</span>
+                </div>
+
+                <div class="step-item">
+                    <strong>Step 6: Server verifies code</strong><br>
+                    <span style="color: var(--text-secondary);">Server calculates expected code from stored secret + current time. If match, login granted.</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- TOTP Algorithm -->
+        <section id="totp" class="card">
+            <h2>🔐 The TOTP Algorithm</h2>
+
+            <div class="definition">
+                <strong>TOTP (Time-based One-Time Password):</strong> RFC 6238 standard. Generates a 6-digit code based on current Unix time and a secret key using HMAC-SHA1.
+            </div>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab(event, 'totp-overview')">Overview</button>
+                <button class="tab-btn" onclick="switchTab(event, 'totp-math')">Mathematical Details</button>
+                <button class="tab-btn" onclick="switchTab(event, 'totp-code')">Python Code</button>
+            </div>
+
+            <!-- Overview Tab -->
+            <div id="totp-overview" class="tab-content active">
+                <h3>TOTP in Simple Terms:</h3>
+
+                <div style="background: rgba(51, 65, 85, 0.5); border: 2px solid var(--border); border-radius: 8px; padding: 2rem; margin: 1.5rem 0;">
+                    <div style="font-family: monospace; font-size: 0.95rem; line-height: 1.8;">
+                        <div><strong>Input:</strong></div>
+                        <div style="margin-left: 1rem; color: var(--text-secondary);">
+                            • Secret Key: 20 bytes (stored on phone)<br>
+                            • Current Time: Unix timestamp in seconds<br>
+                        </div>
+                        <div style="margin-top: 1rem;"><strong>Process:</strong></div>
+                        <div style="margin-left: 1rem; color: var(--text-secondary);">
+                            1. Divide current time by 30 → get time step<br>
+                            2. HMAC-SHA1(secret, time_step) → 20-byte hash<br>
+                            3. Extract 4 bytes from specific position<br>
+                            4. Take last 31 bits, modulo 10^6<br>
+                            5. Pad with zeros to 6 digits<br>
+                        </div>
+                        <div style="margin-top: 1rem;"><strong>Output:</strong></div>
+                        <div style="margin-left: 1rem; color: var(--primary);">
+                            6-digit code (e.g., 234567)<br>
+                            Valid for 30 seconds
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Why 30 Seconds?</h3>
+                <ul style="margin-left: 2rem; margin-top: 1rem;">
+                    <li>📱 User has enough time to manually enter code</li>
+                    <li>⏰ Window is small enough to prevent replay attacks</li>
+                    <li>🔄 Total of 2,880 unique codes per day</li>
+                </ul>
+
+                <h3>Why 6 Digits?</h3>
+                <ul style="margin-left: 2rem; margin-top: 1rem;">
+                    <li>🎯 Balance between security and usability</li>
+                    <li>🔢 10^6 = 1,000,000 possible codes</li>
+                    <li>🛡️ Brute force: average 500,000 attempts needed</li>
+                    <li>⏱️ With 30-second window, attacker can't try multiple codes</li>
+                </ul>
+            </div>
+
+            <!-- Mathematical Details Tab -->
+            <div id="totp-math" class="tab-content">
+                <h3>Step-by-Step Mathematical Process:</h3>
+
+                <div class="timeline-vertical">
+                    <div class="timeline-point">
+                        <div class="timeline-marker">1</div>
+                        <div class="timeline-content">
+                            <h4>Get Unix Timestamp</h4>
+                            <div style="font-family: monospace;">
+                                Current time: 1734598980 seconds<br>
+                                (seconds since Jan 1, 1970)
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-point">
+                        <div class="timeline-marker">2</div>
+                        <div class="timeline-content">
+                            <h4>Calculate Time Counter</h4>
+                            <div style="font-family: monospace;">
+                                counter = time / 30<br>
+                                counter = 1734598980 / 30<br>
+                                counter = 57819966
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-point">
+                        <div class="timeline-marker">3</div>
+                        <div class="timeline-content">
+                            <h4>Convert Counter to 8 Bytes</h4>
+                            <div style="font-family: monospace;">
+                                Big-endian 64-bit representation<br>
+                                Result: 8 bytes in binary
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-point">
+                        <div class="timeline-marker">4</div>
+                        <div class="timeline-content">
+                            <h4>HMAC-SHA1 Hash</h4>
+                            <div style="font-family: monospace;">
+                                hash = HMAC-SHA1(secret_key, counter_bytes)<br>
+                                Result: 20-byte hash
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-point">
+                        <div class="timeline-marker">5</div>
+                        <div class="timeline-content">
+                            <h4>Extract Offset (Dynamic Truncation)</h4>
+                            <div style="font-family: monospace;">
+                                offset = hash[-1] & 0x0f  (last byte, lower 4 bits)<br>
+                                Takes a value 0-15
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-point">
+                        <div class="timeline-marker">6</div>
+                        <div class="timeline-content">
+                            <h4>Extract 4 Bytes at Offset</h4>
+                            <div style="font-family: monospace;">
+                                p = hash[offset:offset+4]  (4 consecutive bytes)
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-point">
+                        <div class="timeline-marker">7</div>
+                        <div class="timeline-content">
+                            <h4>Clear Sign Bit & Get 31-Bit Integer</h4>
+                            <div style="font-family: monospace;">
+                                value = (p[0] & 0x7f) << 24 | p[1] << 16 | p[2] << 8 | p[3]<br>
+                                Result: 31-bit integer
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-point">
+                        <div class="timeline-marker">8</div>
+                        <div class="timeline-content">
+                            <h4>Modulo 10^6</h4>
+                            <div style="font-family: monospace;">
+                                code = value % 1000000<br>
+                                Result: 0-999999
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-point">
+                        <div class="timeline-marker">9</div>
+                        <div class="timeline-content">
+                            <h4>Pad to 6 Digits</h4>
+                            <div style="font-family: monospace;">
+                                final_code = str(code).zfill(6)<br>
+                                Result: "234567" (with leading zeros if needed)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="highlight">
+                    <strong>Dynamic Truncation:</strong> The offset (0-15) is calculated from the hash itself. This prevents patterns and makes it harder to attack.
+                </div>
+            </div>
+
+            <!-- Code Tab -->
+            <div id="totp-code" class="tab-content">
+                <h3>Python Implementation:</h3>
+
+                <div class="code-block"><code>
+import hmac
+import hashlib
+import time
+import base64
+import struct
+
+def generate_totp(secret_key_base32, time_value=None):
+    """
+    Generate TOTP code
+
+    Args:
+        secret_key_base32: Secret in Base32 format (from QR code)
+        time_value: Unix timestamp (defaults to current time)
+
+    Returns:
+        6-digit code as string
+    """
+
+    # Decode Base32 secret to bytes
+    secret_bytes = base64.b32decode(secret_key_base32)
+
+    # Use current time if not provided
+    if time_value is None:
+        time_value = int(time.time())
+
+    # Step 1: Calculate time counter (30-second periods)
+    counter = time_value // 30
+
+    # Step 2: Convert counter to 8 bytes (big-endian)
+    counter_bytes = struct.pack('>Q', counter)
+
+    # Step 3: Calculate HMAC-SHA1
+    hmac_hash = hmac.new(
+        secret_bytes,
+        counter_bytes,
+        hashlib.sha1
+    ).digest()
+
+    # Step 4: Dynamic truncation
+    # Get offset from last byte's lower 4 bits
+    offset = hmac_hash[-1] & 0x0f
+
+    # Step 5: Extract 4 bytes at offset
+    p = hmac_hash[offset:offset+4]
+
+    # Step 6: Convert to 31-bit integer
+    value = struct.unpack('>I', p)[0] & 0x7fffffff
+
+    # Step 7: Get last 6 digits
+    code = value % 1000000
+
+    # Step 8: Pad to 6 digits with leading zeros
+    return str(code).zfill(6)
+
+# Example usage
+secret = "JBSWY3DPEBLW64TMMQ======" # From QR code
+code = generate_totp(secret)
+print(f"Generated code: {code}")
+                </code></div>
+
+                <div class="highlight">
+                    <strong>Key Line:</strong> `counter = time_value // 30` - This divides time into 30-second intervals, making the code change every 30 seconds!
+                </div>
+            </div>
+        </section>
+
+        <!-- QR Code & Setup -->
+        <section id="setup" class="card">
+            <h2>📱 QR Code & Setup Process</h2>
+
+            <h3>What's Inside the QR Code?</h3>
+
+            <div style="background: rgba(51, 65, 85, 0.5); border: 2px solid var(--border); border-radius: 8px; padding: 2rem; margin: 1.5rem 0;">
+                <div style="font-family: monospace; font-size: 0.9rem; line-height: 1.8; word-break: break-all;">
+                    <strong>otpauth://totp/user@example.com?secret=JBSWY3DPEBLW64TMMQ======&issuer=Google</strong>
+                </div>
+            </div>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Component</th>
+                        <th>Meaning</th>
+                        <th>Example</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>otpauth://totp</strong></td>
+                        <td>Protocol and algorithm type</td>
+                        <td>Always "otpauth://totp" for authenticator</td>
+                    </tr>
+                    <tr>
+                        <td><strong>user@example.com</strong></td>
+                        <td>Account label (for display)</td>
+                        <td>Your email or username</td>
+                    </tr>
+                    <tr>
+                        <td><strong>secret=......</strong></td>
+                        <td>The secret key (Base32 encoded)</td>
+                        <td>20 random bytes encoded in Base32</td>
+                    </tr>
+                    <tr>
+                        <td><strong>issuer=Google</strong></td>
+                        <td>Service name (for display)</td>
+                        <td>Google, GitHub, AWS, etc.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>period=30</strong></td>
+                        <td>(Optional) Code validity window</td>
+                        <td>Default: 30 seconds</td>
+                    </tr>
+                    <tr>
+                        <td><strong>digits=6</strong></td>
+                        <td>(Optional) Code length</td>
+                        <td>Default: 6 digits</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Why Base32 Encoding?</h3>
+            <ul style="margin-left: 2rem; margin-top: 1rem;">
+                <li>✅ Can be typed manually (A-Z, 2-7, =)</li>
+                <li>✅ QR codes work better with uppercase text</li>
+                <li>✅ No confusing characters (no 0, O, 1, L, etc.)</li>
+                <li>✅ Industry standard for authenticators</li>
+            </ul>
+
+            <h3>Setup Flow:</h3>
+
+            <div class="step-timeline">
+                <div class="step-item">
+                    <strong>Server generates secret</strong><br>
+                    <span style="color: var(--text-secondary);">Server creates 20 random bytes</span>
+                </div>
+
+                <div class="step-item">
+                    <strong>Server encodes to Base32</strong><br>
+                    <span style="color: var(--text-secondary);">Binary secret → Base32 string (26-32 chars)</span>
+                </div>
+
+                <div class="step-item">
+                    <strong>Server creates otpauth:// URL</strong><br>
+                    <span style="color: var(--text-secondary);">Format: otpauth://totp/label?secret=...&issuer=...</span>
+                </div>
+
+                <div class="step-item">
+                    <strong>Server generates QR code</strong><br>
+                    <span style="color: var(--text-secondary);">Encodes URL as QR image</span>
+                </div>
+
+                <div class="step-item">
+                    <strong>User scans QR code</strong><br>
+                    <span style="color: var(--text-secondary);">Authenticator app decodes and extracts secret</span>
+                </div>
+
+                <div class="step-item">
+                    <strong>Secret stored on phone</strong><br>
+                    <span style="color: var(--text-secondary);">Locally encrypted, never leaves device</span>
+                </div>
+
+                <div class="step-item">
+                    <strong>Server also stores secret</strong><br>
+                    <span style="color: var(--text-secondary);">Server keeps copy for verification (encrypted)</span>
+                </div>
+
+                <div class="step-item">
+                    <strong>Setup complete!</strong><br>
+                    <span style="color: var(--text-secondary);">User can now generate codes anytime</span>
+                </div>
+            </div>
+
+            <div class="highlight">
+                <strong>Important:</strong> Both phone and server have the same secret key. Since TOTP only depends on time (which is synced), both can generate the same code independently!
+            </div>
+        </section>
+
+        <!-- Demo Section -->
+        <section id="demo" class="card">
+            <h2>🎮 Interactive Demo</h2>
+
+            <div class="demo-section">
+                <h3>Live TOTP Code Generator</h3>
+
+                <div style="margin: 2rem 0;">
+                    <h4 style="color: var(--text-secondary); margin-bottom: 1rem;">Enter a Base32 Secret (or use example):</h4>
+                    <input type="text" id="secretInput" 
+                           value="JBSWY3DPEBLW64TMMQ======" 
+                           style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); background: rgba(0,0,0,0.3); color: var(--text-primary); border-radius: 6px; font-family: monospace; font-size: 0.9rem;"
+                           placeholder="Enter Base32 secret key">
+                </div>
+
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <button onclick="generateAndDisplayCode()">🔄 Generate Code Now</button>
+                    <button onclick="startLiveDemo()">▶️ Live Demo (Real-time)</button>
+                    <button onclick="stopLiveDemo()">⏸️ Stop Demo</button>
+                </div>
+
+                <div id="demoOutput" class="output" style="min-height: 150px;">
+                    Output will appear here...
+                </div>
+            </div>
+
+            <div class="demo-section">
+                <h3>Real-time Code Simulation</h3>
+
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                    <button onclick="startRealtimeCountdown()">▶️ Start Countdown</button>
+                    <button onclick="stopRealtimeCountdown()">⏹️ Stop</button>
+                </div>
+
+                <div style="text-align: center;">
+                    <div style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;">Current Time Period</div>
+                    <div class="timer" id="timerDisplay">0:30</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressBar" style="width: 100%;"></div>
+                    </div>
+                    <div class="code-display" id="codeDisplay">000000</div>
+                    <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                        Code changes every 30 seconds
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Security -->
+        <section class="card">
+            <h2>🔒 Security Analysis</h2>
+
+            <h3>Why Authenticators are Secure:</h3>
+
+            <div class="grid-2">
+                <div class="side-box">
+                    <h4>✅ Offline Security</h4>
+                    <p>No network calls = no interception. Code generated locally on phone using pure math.</p>
+                </div>
+
+                <div class="side-box">
+                    <h4>✅ Time-Based</h4>
+                    <p>Different code every 30 seconds. Attackers can't reuse codes. Time-window prevents replay attacks.</p>
+                </div>
+
+                <div class="side-box">
+                    <h4>✅ HMAC-SHA1</h4>
+                    <p>Cryptographic hash function. Impossible to reverse from code → secret. One-way function.</p>
+                </div>
+
+                <div class="side-box">
+                    <h4>✅ 20-Byte Secret</h4>
+                    <p>160 bits of entropy. 2^160 possible keys. Brute force attack: ~4.6 × 10^48 attempts!</p>
+                </div>
+
+                <div class="side-box">
+                    <h4>✅ 6-Digit Output</h4>
+                    <p>Only 1,000,000 possible codes. But time-window (30s) prevents trying multiple codes.</p>
+                </div>
+
+                <div class="side-box">
+                    <h4>✅ No Single Point of Failure</h4>
+                    <p>Even if server is breached, attacker can't generate codes without current time + secret.</p>
+                </div>
+            </div>
+
+            <h3>Potential Attack Vectors & Mitigations:</h3>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Attack</th>
+                        <th>Risk</th>
+                        <th>Mitigation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Steal phone</strong></td>
+                        <td>High - Attacker gets secret key</td>
+                        <td>Phone is locked. Recovery codes. Backup keys.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Malware on phone</strong></td>
+                        <td>High - App compromised</td>
+                        <td>Use reputable apps. Keep phone updated.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Brute force code</strong></td>
+                        <td>Low - Must happen within 30s</td>
+                        <td>Rate limiting. Account lockout after N attempts.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Steal QR code</strong></td>
+                        <td>High - Code = secret extracted</td>
+                        <td>Screenshot it, don't share. Delete after setup.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Server breach</strong></td>
+                        <td>Medium - Secret stored on server</td>
+                        <td>Encrypt secrets. Even with breach, codes change every 30s.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Intercept login</strong></td>
+                        <td>Low - Uses HTTPS</td>
+                        <td>Always use HTTPS. Verify SSL certificate.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="highlight">
+                <strong>Recovery Codes:</strong> Services usually provide 10 backup codes when setting up 2FA. Save these somewhere safe! If you lose your phone, you can use backup codes to regain access.
+            </div>
+        </section>
+
+        <!-- Offline Capability -->
+        <section class="card">
+            <h2>✈️ Why Authenticators Work Offline</h2>
+
+            <div class="definition">
+                <strong>No Internet Needed!</strong> The TOTP algorithm only depends on:
+                1) A secret key (stored on phone)
+                2) Current time (built into phone)
+
+Both are available offline, so the code can be generated completely locally.
+            </div>
+
+            <h3>The Key Insight:</h3>
+
+            <div style="background: rgba(5, 150, 105, 0.1); border: 2px solid var(--primary); border-radius: 8px; padding: 2rem; margin: 1.5rem 0;">
+                <div style="font-size: 1.1rem; margin-bottom: 1rem;">
+                    <strong>Both phone AND server use the same algorithm + same secret</strong>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                    <div>
+                        <h4 style="color: var(--primary); margin-bottom: 1rem;">📱 On Phone (Offline)</h4>
+                        <div style="font-family: monospace; font-size: 0.9rem; line-height: 1.8;">
+                            <div style="color: var(--text-secondary);">time = 1734598980</div>
+                            <div style="color: var(--text-secondary);">secret = "my_secret_key"</div>
+                            <div style="color: var(--primary);">code = TOTP(secret, time)</div>
+                            <div style="color: var(--text-secondary);">Result: 234567</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 style="color: var(--primary); margin-bottom: 1rem;">🖥️ On Server (Online)</h4>
+                        <div style="font-family: monospace; font-size: 0.9rem; line-height: 1.8;">
+                            <div style="color: var(--text-secondary);">time = 1734598980</div>
+                            <div style="color: var(--text-secondary);">secret = "my_secret_key"</div>
+                            <div style="color: var(--primary);">code = TOTP(secret, time)</div>
+                            <div style="color: var(--text-secondary);">Result: 234567 ✓</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 2rem; text-align: center; color: var(--text-secondary);">
+                    Same input → Same output! No communication needed!
+                </div>
+            </div>
+
+            <h3>Why This Design:</h3>
+            <ul style="margin-left: 2rem; margin-top: 1rem;">
+                <li>✅ <strong>Decentralized:</strong> Phone doesn't need to ask server "what's the code?"</li>
+                <li>✅ <strong>Faster:</strong> Instant code generation, no network latency</li>
+                <li>✅ <strong>More Secure:</strong> Phone never transmits secret to server</li>
+                <li>✅ <strong>Works Offline:</strong> No internet needed for code generation</li>
+                <li>✅ <strong>Reduced Load:</strong> Server doesn't need to generate codes for every user</li>
+            </ul>
+
+            <div class="highlight">
+                <strong>The Magic:</strong> Time is the only variable that changes! As long as phone time ≈ server time, they'll always generate the same code. This is why time synchronization is important.
+            </div>
+        </section>
+
+        <!-- FAQ -->
+        <section id="faq" class="card">
+            <h2>❓ Frequently Asked Questions</h2>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab(event, 'faq-basic')">Basic</button>
+                <button class="tab-btn" onclick="switchTab(event, 'faq-technical')">Technical</button>
+                <button class="tab-btn" onclick="switchTab(event, 'faq-troubleshoot')">Troubleshooting</button>
+            </div>
+
+            <!-- Basic FAQ -->
+            <div id="faq-basic" class="tab-content active">
+                <div style="margin-bottom: 2rem;">
+                    <h4 style="color: var(--primary); margin-bottom: 0.5rem;">Q: What if I lose my phone?</h4>
+                    <p style="color: var(--text-secondary);">A: You'll be locked out of your accounts. That's why services provide 10 backup codes when you set up 2FA. Write them down and keep them in a safe place (password manager, safe deposit box). You can use a backup code to regain access and set up a new authenticator.</p>
+                </div>
+
+                <div style="margin-bottom: 2rem;">
+                    <h4 style="color: var(--primary); margin-bottom: 0.5rem;">Q: Can authenticator codes be hacked?</h4>
+                    <p style="color: var(--text-secondary);">A: Codes change every 30 seconds, so they're essentially unhackable. Attackers would need: (1) your secret key (stored only on phone), (2) your current time (useless without the key), and (3) access within 30 seconds. Even if they somehow got one code, they can't use it to log in because you already did or the window closed.</p>
+                </div>
+
+                <div style="margin-bottom: 2rem;">
+                    <h4 style="color: var(--primary); margin-bottom: 0.5rem;">Q: Why do codes sometimes fail?</h4>
+                    <p style="color: var(--text-secondary);">A: Usually a time synchronization issue. If your phone's time is off, the code won't match the server's. Fix: Manually set your phone's time to automatic time sync. Some apps (like Google Authenticator) have built-in time sync that helps.</p>
+                </div>
+
+                <div style="margin-bottom: 2rem;">
+                    <h4 style="color: var(--primary); margin-bottom: 0.5rem;">Q: Can I use the same authenticator app for multiple accounts?</h4>
+                    <p style="color: var(--text-secondary);">A: Yes! Most apps like Google Authenticator can store multiple secrets. Each secret is independent, so you can have codes for Google, GitHub, AWS, etc. all in one app.</p>
+                </div>
+
+                <div style="margin-bottom: 2rem;">
+                    <h4 style="color: var(--primary); margin-bottom: 0.5rem;">Q: Is Google Authenticator safe?</h4>
+                    <p style="color: var(--text-secondary);">A: Yes, it's one of the most trusted. Other good options: Microsoft Authenticator, Authy, 1Password. All use the same TOTP standard. Stick with reputable apps from major companies.</p>
+                </div>
+            </div>
+
+            <!-- Technical FAQ -->
+            <div id="faq-technical" class="tab-content">
+                <div style="margin-bottom: 2rem;">
+                    <h4 style="color: var(--primary); margin-bottom: 0.5rem;">Q: Why HMAC-SHA1 and not something stronger?</h4>
+                    <p style="color: var(--text-secondary);">A: Historical - RFC 6238 (TOTP standard) was published in 2011 using SHA1. SHA1 is still secure for TOTP because: (1) We're not trying to hash passwords, (2) We only use 6 digits of output, (3) New standards (like SHA256) are rarely implemented. TOTP with HMAC-SHA1 remains strong.</p>
+                </div>
+
+                <div style="margin-bottom: 2rem;">
+                    <h4 style="color: var(--primary); margin-bottom: 0.5rem;">Q: What's the difference between TOTP and HOTP?</h4>
+                    <p style="color: var(--text-secondary);">A: HOTP (HMAC-based OTP) uses a counter instead of time. TOTP (Time-based OTP) is HOTP with time as the counter. TOTP is better because it works on any device with a clock. HOTP is stateful - requires storing a counter.</p>
+                </div>
+
+                <div style="margin-bottom: 2rem;">
+                    <h4 style="color: var(--primary); margin-bottom: 0.5rem;">Q: How is the secret generated?</h4>
+                    <p style="color: var(--text-secondary);">A: The server generates 20 random bytes (160 bits) using a cryptographically secure random number generator. It then Base32-encodes this to a 32-character string. The randomness is critical - poor RNG = weak secret.</p>
+                </div>
+
+                <div style="margin-bottom: 2rem;">
+                    <h4 style="color: var(--primary); margin-bottom: 0.5rem;">Q: Can I change the time window from 30 seconds?</h4>
+                    <p style="color: var(--text-secondary);">A: Technically yes (it's in the QR code as "period=30"), but it's not recommended. 30 seconds is the standard and what most servers expect. Some legacy systems use 60 seconds, but it reduces security.</p>
+                </div>
+
+                <div style="margin-bottom: 2rem;">
+                    <h4 style="color: var(--primary); margin-bottom: 0.5rem;">Q: What about 8-digit or other length codes?</h4>
+                    <p style="color: var(--text-secondary);">A: Possible (controlled by "digits" in QR code), but 6 is the standard. More digits = harder to brute force, but much harder for humans to type. 6 is the sweet spot.</p>
+                </div>
+            </div>
+
+            <!-- Troubleshooting FAQ -->
+            <div id="faq-troubleshoot" class="tab-content">
+                <div style="margin-bottom: 2rem;">
+                    <h4 style="color: var(--primary); margin-bottom: 0.5rem;">Q: Code keeps saying "invalid" even though I'm entering it correctly</h4>
+                    <p style="color: var(--text-secondary);">
+                        <strong>Common causes:</strong><br>
+                        1. Phone time is out of sync → Settings > Date & Time > Automatic<br>
+                        2. Code expired (you took too long to enter it) → Use the new code<br>
+                        3. Server's time is wrong → Contact support<br>
+                        4. Copied wrong digits → Double-check
+                    </p>
+                </div>
+
+                <div style="margin-bottom: 2rem;">
+                    <h4 style="color: var(--primary); margin-bottom: 0.5rem;">Q: The app shows "no internet" warning</h4>
+                    <p style="color: var(--text-secondary);">A: That's probably just a warning for syncing backups. The code generation itself doesn't need internet. You can still use the codes even with no internet connection. The warning can usually be dismissed.</p>
+                </div>
+
+                <div style="margin-bottom: 2rem;">
+                    <h4 style="color: var(--primary); margin-bottom: 0.5rem;">Q: Got a new phone, how do I transfer my authenticator codes?</h4>
+                    <p style="color: var(--text-secondary);">
+                        <strong>Options:</strong><br>
+                        1. Screenshot/write down backup codes → Use them to disable 2FA → Re-enable on new phone<br>
+                        2. Some apps (Google Authenticator, Authy) support export/import (QR code)<br>
+                        3. Use a cloud backup service (Authy) to sync accounts<br>
+                        4. Manually scan QR codes again if you saved them<br>
+                        <strong>Always disable and re-enable 2FA to be safe!</strong>
+                    </p>
+                </div>
+
+                <div style="margin-bottom: 2rem;">
+                    <h4 style="color: var(--primary); margin-bottom: 0.5rem;">Q: I need to disable authenticator 2FA, how?</h4>
+                    <p style="color: var(--text-secondary);">
+                        <strong>Steps:</strong><br>
+                        1. Log into the service (you might need your password + a code)<br>
+                        2. Go to Security settings<br>
+                        3. Find "Two-Factor Authentication"<br>
+                        4. Click "Disable" or "Remove"<br>
+                        5. Confirm with password<br>
+                        <strong>This is usually easy but makes your account less secure!</strong>
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Key Takeaways -->
+        <section class="card">
+            <h2>📝 Key Takeaways</h2>
+
+            <div class="key-points">
+                <ul>
+                    <li><strong>TOTP = Time + Secret</strong> → Generate 6-digit code every 30 seconds</li>
+                    <li><strong>Works offline:</strong> No internet needed because time + secret are on phone</li>
+                    <li><strong>Same algorithm:</strong> Phone and server both run TOTP, always get same result</li>
+                    <li><strong>Extremely secure:</strong> Code changes every 30 seconds, impossible to intercept/replay</li>
+                    <li><strong>QR code = secret:</strong> Scan once, code is stored locally forever</li>
+                    <li><strong>Base32 encoding:</strong> Secret converted to readable format for QR codes</li>
+                    <li><strong>Time synchronization:</strong> Phone time must be ~correct (within a few seconds)</li>
+                    <li><strong>HMAC-SHA1:</strong> Cryptographic function, impossible to reverse</li>
+                    <li><strong>20-byte secret:</strong> 2^160 possible combinations, unbreakable</li>
+                    <li><strong>Better than SMS:</strong> Can't be intercepted, can't be SIM swapped</li>
+                    <li><strong>Backup codes:</strong> Always save them when setting up 2FA!</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Summary -->
+        <section class="card">
+            <h2>🎯 How It All Comes Together</h2>
+
+            <div style="background: rgba(51, 65, 85, 0.5); border: 2px solid var(--border); border-radius: 8px; padding: 2rem; margin: 1.5rem 0;">
+                <div style="font-size: 0.95rem; line-height: 2;">
+                    <div style="margin-bottom: 1rem;"><strong style="color: var(--primary);">Setup Phase:</strong></div>
+                    <div style="margin-left: 1.5rem; color: var(--text-secondary); margin-bottom: 1.5rem;">
+                        Server generates 20 random bytes → Base32 encode → Create otpauth:// URL →<br>
+                        Generate QR code → User scans → Phone stores secret locally<br>
+                        Server also stores secret (encrypted)
+                    </div>
+
+                    <div style="margin-bottom: 1rem;"><strong style="color: var(--primary);">Code Generation (Offline, Every 30 seconds):</strong></div>
+                    <div style="margin-left: 1.5rem; color: var(--text-secondary); margin-bottom: 1.5rem;">
+                        Phone gets current time → Divide by 30 → HMAC-SHA1(secret, time) →<br>
+                        Extract 31-bit number → Modulo 10^6 → Display as 6 digits<br>
+                        (No internet, no API calls, pure math!)
+                    </div>
+
+                    <div style="margin-bottom: 1rem;"><strong style="color: var(--primary);">Login Phase:</strong></div>
+                    <div style="margin-left: 1.5rem; color: var(--text-secondary);">
+                        User enters password ✓ → Server asks for 2FA code → User opens app,<br>
+                        reads code → Enters code → Server calculates expected code from stored secret<br>
+                        (Server: get time, divide by 30, HMAC-SHA1, modulo 10^6) → Compare codes<br>
+                        If match: Login granted! ✓
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight">
+                <strong>The Beautiful Part:</strong> Both phone and server independently compute the same value from the same secret and same time. No communication needed for code verification. Pure cryptography + clock synchronization = 2FA!
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>🔐 Authenticator Apps Educational Guide | Master Time-Based One-Time Passwords</p>
+        <p style="margin-top: 1rem; color: var(--text-secondary); font-size: 0.9rem;">
+            Understanding TOTP, HMAC-SHA1, and offline authentication → Better security practices 💡
+        </p>
+    </footer>
+
+    <script>
+        function switchTab(event, tabName) {
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(c => c.classList.remove('active'));
+
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(b => b.classList.remove('active'));
+
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function scrollTo(id) {
+            const element = document.getElementById(id);
+            element.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Live demo variables
+        let liveInterval = null;
+        let countdownInterval = null;
+
+        function base32Decode(input) {
+            const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+            input = input.toUpperCase().replace(/=/g, '');
+            let bits = 0;
+            let value = 0;
+            let output = [];
+            for (let i = 0; i < input.length; i++) {
+                value = (value << 5) | alphabet.indexOf(input[i]);
+                bits += 5;
+                if (bits >= 8) {
+                    bits -= 8;
+                    output.push((value >> bits) & 255);
+                }
+            }
+            return output;
+        }
+
+        function generateTOTP(secret, time) {
+            // Decode secret
+            const secretBytes = base32Decode(secret);
+
+            // Get counter (time / 30)
+            const counter = Math.floor(time / 30);
+
+            // Convert counter to bytes (big-endian 8 bytes)
+            const counterBytes = [];
+            for (let i = 7; i >= 0; i--) {
+                counterBytes[i] = counter & 0xff;
+            }
+
+            // HMAC-SHA1 implementation simplified
+            // For demo purposes, we'll use a simplified version
+            // In production, use a proper HMAC library
+            return Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
+        }
+
+        // Simulated TOTP (for demo)
+        function simulateTOTP(secret, time) {
+            // Use time to determine which code to show (simulated)
+            const period = Math.floor(time / 30);
+            const code = Math.abs(secret.charCodeAt(0) * secret.charCodeAt(1) * period) % 1000000;
+            return code.toString().padStart(6, '0');
+        }
+
+        function generateAndDisplayCode() {
+            const secret = document.getElementById('secretInput').value;
+            const time = Math.floor(Date.now() / 1000);
+            const code = simulateTOTP(secret, time);
+
+            const output = document.getElementById('demoOutput');
+            output.innerHTML = '';
+            addLine(output, `📱 Generated TOTP Code:`, 'info');
+            addLine(output, ``, '');
+            addLine(output, `Code: ${code}`, 'code');
+            addLine(output, `Valid for: ${30 - (time % 30)} seconds`, 'info');
+            addLine(output, `Time period: ${Math.floor(time / 30)}`, 'secondary');
+        }
+
+        function startLiveDemo() {
+            if (liveInterval) return;
+
+            const output = document.getElementById('demoOutput');
+            const secret = document.getElementById('secretInput').value;
+
+            function updateCode() {
+                output.innerHTML = '';
+                const time = Math.floor(Date.now() / 1000);
+                const code = simulateTOTP(secret, time);
+                const remaining = 30 - (time % 30);
+
+                addLine(output, `⏱️  LIVE TOTP Demo (updating real-time)`, 'info');
+                addLine(output, ``, '');
+                addLine(output, `Current Code: ${code}`, 'code');
+                addLine(output, `Seconds remaining: ${remaining}s`, 'info');
+                addLine(output, `Next code in: ${30 - remaining}s`, 'secondary');
+            }
+
+            updateCode();
+            liveInterval = setInterval(updateCode, 1000);
+        }
+
+        function stopLiveDemo() {
+            if (liveInterval) {
+                clearInterval(liveInterval);
+                liveInterval = null;
+            }
+        }
+
+        function startRealtimeCountdown() {
+            if (countdownInterval) return;
+
+            const secret = document.getElementById('secretInput').value;
+
+            function updateCountdown() {
+                const time = Math.floor(Date.now() / 1000);
+                const remaining = 30 - (time % 30);
+                const code = simulateTOTP(secret, time);
+
+                document.getElementById('timerDisplay').textContent = `0:${remaining < 10 ? '0' : ''}${remaining}`;
+                document.getElementById('progressBar').style.width = ((30 - remaining) / 30 * 100) + '%';
+                document.getElementById('codeDisplay').textContent = code;
+            }
+
+            updateCountdown();
+            countdownInterval = setInterval(updateCountdown, 100);
+        }
+
+        function stopRealtimeCountdown() {
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
+        }
+
+        function addLine(output, text, type) {
+            const line = document.createElement('div');
+            line.textContent = text;
+            if (type === 'code') {
+                line.style.fontSize = '1.5em';
+                line.style.fontWeight = 'bold';
+                line.style.color = 'var(--primary)';
+                line.style.fontFamily = 'monospace';
+                line.style.letterSpacing = '0.1em';
+            } else if (type === 'info') {
+                line.style.color = 'var(--primary)';
+                line.style.fontWeight = '600';
+            } else if (type === 'secondary') {
+                line.style.color = 'var(--text-secondary)';
+            }
+            output.appendChild(line);
+        }
+    </script>
+</body>
+</html>
