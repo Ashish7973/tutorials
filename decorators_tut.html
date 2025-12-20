@@ -1,0 +1,1812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Decorators - Complete Technical Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #ec4899;
+            --secondary: #db2777;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --dark-bg: #0f172a;
+            --light-bg: #1e293b;
+            --card-bg: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --border: #475569;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #1a293e 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        nav {
+            position: sticky;
+            top: 0;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            z-index: 100;
+            padding: 1rem 0;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .nav-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ec4899, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 4rem 0;
+            margin-bottom: 3rem;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .hero .tagline {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: linear-gradient(135deg, rgba(51, 65, 85, 0.5) 0%, rgba(30, 41, 59, 0.5) 100%);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 8px 25px rgba(236, 72, 153, 0.15);
+        }
+
+        .card h2 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+        }
+
+        .card h3 {
+            color: var(--primary);
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 1rem;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: 2px solid var(--border);
+            color: var(--text-secondary);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .tab-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .definition {
+            background: rgba(236, 72, 153, 0.1);
+            border-left: 4px solid var(--primary);
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 6px;
+        }
+
+        .code-block {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+
+        .code-block code {
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        .highlight {
+            background: rgba(236, 72, 153, 0.1);
+            border-left: 4px solid var(--warning);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+            color: var(--text-secondary);
+        }
+
+        .key-points {
+            background: rgba(236, 72, 153, 0.05);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .key-points h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .key-points ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .key-points li {
+            padding: 0.5rem 0;
+            padding-left: 2rem;
+            position: relative;
+            color: var(--text-secondary);
+        }
+
+        .key-points li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .side-box {
+            background: rgba(51, 65, 85, 0.5);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .side-box h4 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .step-timeline {
+            position: relative;
+            padding: 2rem 0;
+        }
+
+        .step-item {
+            padding-left: 3rem;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .step-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 20px;
+            height: 20px;
+            background: var(--primary);
+            border-radius: 50%;
+            border: 3px solid var(--dark-bg);
+        }
+
+        .step-item::after {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 20px;
+            width: 4px;
+            height: calc(100% + 2rem);
+            background: var(--border);
+        }
+
+        .step-item:last-child::after {
+            display: none;
+        }
+
+        .step-item strong {
+            color: var(--primary);
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        button:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3);
+        }
+
+        .output {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+            min-height: 200px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            max-height: 400px;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .comparison-table th {
+            background: rgba(236, 72, 153, 0.2);
+            color: var(--primary);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .comparison-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .decorator-chain {
+            background: rgba(51, 65, 85, 0.5);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            font-family: monospace;
+        }
+
+        .chain-box {
+            background: rgba(236, 72, 153, 0.1);
+            border: 2px solid var(--primary);
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            text-align: center;
+        }
+
+        .flow-arrow {
+            text-align: center;
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin: 0.5rem 0;
+        }
+
+        footer {
+            text-align: center;
+            padding: 3rem 0;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border);
+            margin-top: 4rem;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+
+            .nav-links {
+                gap: 0.5rem;
+                font-size: 0.8rem;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                gap: 0.3rem;
+            }
+
+            .tab-btn {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.8rem;
+            }
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            margin-right: 0.5rem;
+        }
+
+        .badge-good {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        .badge-bad {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+
+        .layer-diagram {
+            background: rgba(51, 65, 85, 0.5);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .layer {
+            background: rgba(236, 72, 153, 0.1);
+            border: 2px solid var(--primary);
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 0.75rem 0;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        table th, table td {
+            border: 1px solid var(--border);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        table th {
+            background: rgba(236, 72, 153, 0.1);
+            color: var(--primary);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <div class="nav-title">🎀 Python Decorators</div>
+            <ul class="nav-links">
+                <li><a href="#intro">Intro</a></li>
+                <li><a href="#basics">Basics</a></li>
+                <li><a href="#internals">Internals</a></li>
+                <li><a href="#parameters">Parameters</a></li>
+                <li><a href="#advanced">Advanced</a></li>
+                <li><a href="#production">Production</a></li>
+                <li><a href="#demo">Demo</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Hero -->
+        <section class="hero">
+            <h1>Python Decorators Explained</h1>
+            <p class="tagline">Master Higher-Order Functions & Metaprogramming: From Basics to Production</p>
+        </section>
+
+        <!-- Introduction -->
+        <section id="intro" class="card">
+            <h2>🎯 What is a Decorator?</h2>
+
+            <div class="definition">
+                <strong>Decorator:</strong> A function that takes another function as input, adds some functionality, and returns the modified function. It's a way to "wrap" or "decorate" a function without changing its source code.
+            </div>
+
+            <h3>Simple Analogy:</h3>
+            <div style="margin: 1.5rem 0; background: rgba(51, 65, 85, 0.5); border: 2px solid var(--border); border-radius: 8px; padding: 1.5rem;">
+                <p style="margin-bottom: 1rem;">Think of a decorator like a gift wrapper:</p>
+                <ul style="margin-left: 2rem;">
+                    <li>🎁 Original function = gift inside</li>
+                    <li>📦 Decorator = gift wrapper that adds decoration</li>
+                    <li>🎀 Result = wrapped gift with all enhancements</li>
+                </ul>
+            </div>
+
+            <h3>Key Concepts:</h3>
+            <ul style="margin-left: 2rem; margin-top: 1rem;">
+                <li>✅ <strong>Higher-Order Functions:</strong> Functions that take/return functions</li>
+                <li>✅ <strong>Closures:</strong> Inner function accesses outer function's variables</li>
+                <li>✅ <strong>Metaprogramming:</strong> Code that modifies code at runtime</li>
+                <li>✅ <strong>Syntactic Sugar:</strong> @ symbol makes syntax clean</li>
+                <li>✅ <strong>Non-intrusive:</strong> Decorates without changing original code</li>
+            </ul>
+
+            <h3>Real-World Use Cases:</h3>
+            <div class="grid-2">
+                <div class="side-box">
+                    <h4>⏱️ Timing/Performance</h4>
+                    <p>Measure execution time of functions</p>
+                </div>
+                <div class="side-box">
+                    <h4>📝 Logging</h4>
+                    <p>Log function calls automatically</p>
+                </div>
+                <div class="side-box">
+                    <h4>🔐 Authentication</h4>
+                    <p>Check permissions before execution</p>
+                </div>
+                <div class="side-box">
+                    <h4>💾 Caching/Memoization</h4>
+                    <p>Cache results to avoid recomputation</p>
+                </div>
+                <div class="side-box">
+                    <h4>🔄 Retry Logic</h4>
+                    <p>Retry failed operations</p>
+                </div>
+                <div class="side-box">
+                    <h4>✅ Validation</h4>
+                    <p>Validate arguments before processing</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Basics -->
+        <section id="basics" class="card">
+            <h2>📚 Decorator Basics</h2>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab(event, 'basics-simple')">Simple</button>
+                <button class="tab-btn" onclick="switchTab(event, 'basics-closure')">Closures</button>
+                <button class="tab-btn" onclick="switchTab(event, 'basics-syntax')">@ Syntax</button>
+            </div>
+
+            <!-- Simple Tab -->
+            <div id="basics-simple" class="tab-content active">
+                <h3>Simplest Decorator Ever:</h3>
+
+                <div class="code-block"><pre><code>
+# Step 1: Define a decorator function
+def my_decorator(func):
+    def wrapper():
+        print("Before the function call")
+        func()
+        print("After the function call")
+    return wrapper
+
+# Step 2: Use it (manual wrapping)
+def say_hello():
+    print("Hello!")
+
+say_hello = my_decorator(say_hello)
+
+# Step 3: Call decorated function
+say_hello()
+
+# Output:
+# Before the function call
+# Hello!
+# After the function call
+                </code></pre></div>
+
+                <h3>What Just Happened:</h3>
+
+                <div class="step-timeline">
+                    <div class="step-item">
+                        <strong>say_hello = my_decorator(say_hello)</strong><br>
+                        <span style="color: var(--text-secondary);">Pass function to decorator, get wrapper back</span>
+                    </div>
+
+                    <div class="step-item">
+                        <strong>say_hello is now wrapper</strong><br>
+                        <span style="color: var(--text-secondary);">Original function replaced with wrapper</span>
+                    </div>
+
+                    <div class="step-item">
+                        <strong>Calling say_hello() calls wrapper()</strong><br>
+                        <span style="color: var(--text-secondary);">Which calls original function inside</span>
+                    </div>
+                </div>
+
+                <div class="highlight">
+                    <strong>Key Point:</strong> A decorator is just a function that returns another function. The @ syntax is just syntactic sugar for the manual wrapping above.
+                </div>
+            </div>
+
+            <!-- Closures Tab -->
+            <div id="basics-closure" class="tab-content">
+                <h3>Closures (The Magic):</h3>
+
+                <div class="definition">
+                    <strong>Closure:</strong> An inner function that "closes over" variables from its outer function. Even after the outer function returns, the inner function can still access those variables.
+                </div>
+
+                <h3>Example:</h3>
+
+                <div class="code-block"><pre><code>
+def outer(x):
+    # x is in outer's scope
+
+    def inner(y):
+        # inner "closes over" x
+        return x + y
+
+    return inner
+
+# Create two closures
+add_5 = outer(5)
+add_10 = outer(10)
+
+print(add_5(3))    # 8 (5 + 3)
+print(add_10(3))   # 13 (10 + 3)
+
+# Each closure remembers its own 'x'!
+                </code></pre></div>
+
+                <h3>How Decorators Use Closures:</h3>
+
+                <div class="code-block"><pre><code>
+def repeat_decorator(func):
+    # func is "closed over" by wrapper
+
+    def wrapper(*args, **kwargs):
+        # wrapper remembers func even after decorator returns
+        print(f"Calling {func.__name__}")
+        result = func(*args, **kwargs)
+        print(f"Result: {result}")
+        return result
+
+    return wrapper
+
+@repeat_decorator
+def add(a, b):
+    return a + b
+
+add(5, 3)
+# Output:
+# Calling add
+# Result: 8
+                </code></pre></div>
+
+                <div class="highlight">
+                    <strong>Closure Magic:</strong> The wrapper function is defined inside decorator. When decorator returns wrapper, the wrapper still has access to func. That's closure!
+                </div>
+            </div>
+
+            <!-- Syntax Tab -->
+            <div id="basics-syntax" class="tab-content">
+                <h3>The @ Syntax (Syntactic Sugar):</h3>
+
+                <h4 style="color: var(--primary); margin: 1.5rem 0 0.5rem 0;">These are equivalent:</h4>
+
+                <div class="code-block"><pre><code>
+# Version 1: Manual wrapping
+def greet(name):
+    return f"Hello {name}"
+
+greet = my_decorator(greet)
+
+# Version 2: Using @ syntax
+@my_decorator
+def greet(name):
+    return f"Hello {name}"
+
+# Both do the same thing!
+                </code></pre></div>
+
+                <h3>Execution Flow:</h3>
+
+                <div class="decorator-chain">
+                    <div class="chain-box">@my_decorator</div>
+                    <div class="flow-arrow">↓ (Python sees this and does:)</div>
+                    <div class="chain-box">greet = my_decorator(greet)</div>
+                    <div class="flow-arrow">↓ (Result:)</div>
+                    <div class="chain-box">greet is now the wrapper function</div>
+                </div>
+
+                <h3>Multiple @ Symbols:</h3>
+
+                <div class="code-block"><pre><code>
+@decorator_a
+@decorator_b
+@decorator_c
+def my_function():
+    pass
+
+# Applied bottom-to-top:
+# my_function = decorator_a(decorator_b(decorator_c(my_function)))
+
+# Executes as:
+# decorator_a( decorator_b( decorator_c(my_function) ) )
+                </code></pre></div>
+
+                <div class="highlight">
+                    <strong>Important:</strong> Decorators are applied bottom-to-top! The closest decorator to the function is applied first.
+                </div>
+            </div>
+        </section>
+
+        <!-- Internals -->
+        <section id="internals" class="card">
+            <h2>🔧 Decorator Internals</h2>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab(event, 'internals-args')">With Arguments</button>
+                <button class="tab-btn" onclick="switchTab(event, 'internals-wraps')">@wraps</button>
+                <button class="tab-btn" onclick="switchTab(event, 'internals-metadata')">Metadata</button>
+            </div>
+
+            <!-- Arguments Tab -->
+            <div id="internals-args" class="tab-content active">
+                <h3>Handling Function Arguments:</h3>
+
+                <div class="definition">
+                    <strong>Problem:</strong> What if the decorated function takes arguments?
+                </div>
+
+                <div class="code-block"><pre><code>
+# ❌ BAD: Only works for functions with no arguments
+def simple_decorator(func):
+    def wrapper():
+        print("Before")
+        func()  # Can't pass arguments!
+        print("After")
+    return wrapper
+
+# ✅ GOOD: Works with any arguments
+def good_decorator(func):
+    def wrapper(*args, **kwargs):
+        print("Before")
+        result = func(*args, **kwargs)  # Forward arguments
+        print("After")
+        return result
+    return wrapper
+
+@good_decorator
+def greet(name, greeting="Hello"):
+    return f"{greeting}, {name}!"
+
+print(greet("Alice", greeting="Hi"))
+# Output:
+# Before
+# Hi, Alice!
+# After
+                </code></pre></div>
+
+                <h3>Understanding *args, **kwargs:</h3>
+
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Syntax</th>
+                            <th>Meaning</th>
+                            <th>Example</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>*args</strong></td>
+                            <td>Positional arguments as tuple</td>
+                            <td>func(1, 2, 3) → args=(1,2,3)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>**kwargs</strong></td>
+                            <td>Keyword arguments as dict</td>
+                            <td>func(a=1, b=2) → kwargs={'a':1,'b':2}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>*args, **kwargs</strong></td>
+                            <td>Both positional and keyword</td>
+                            <td>Captures all argument types</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- @wraps Tab -->
+            <div id="internals-wraps" class="tab-content">
+                <h3>The @wraps Problem:</h3>
+
+                <div class="code-block"><pre><code>
+def my_decorator(func):
+    def wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
+    return wrapper
+
+@my_decorator
+def add(a, b):
+    """Add two numbers"""
+    return a + b
+
+print(add.__name__)    # 'wrapper' ❌ (should be 'add')
+print(add.__doc__)     # None ❌ (should be docstring)
+print(help(add))       # Shows wrapper, not original function
+                </code></pre></div>
+
+                <h3>The @wraps Solution:</h3>
+
+                <div class="code-block"><pre><code>
+from functools import wraps
+
+def my_decorator(func):
+    @wraps(func)  # Copy metadata from func to wrapper
+    def wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
+    return wrapper
+
+@my_decorator
+def add(a, b):
+    """Add two numbers"""
+    return a + b
+
+print(add.__name__)    # 'add' ✓
+print(add.__doc__)     # 'Add two numbers' ✓
+                </code></pre></div>
+
+                <h3>What @wraps Does:</h3>
+
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Attribute</th>
+                            <th>Without @wraps</th>
+                            <th>With @wraps</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>__name__</strong></td>
+                            <td>wrapper</td>
+                            <td>original function name</td>
+                        </tr>
+                        <tr>
+                            <td><strong>__doc__</strong></td>
+                            <td>None</td>
+                            <td>original docstring</td>
+                        </tr>
+                        <tr>
+                            <td><strong>__module__</strong></td>
+                            <td>wrapper module</td>
+                            <td>original module</td>
+                        </tr>
+                        <tr>
+                            <td><strong>__qualname__</strong></td>
+                            <td>wrapper</td>
+                            <td>original qualified name</td>
+                        </tr>
+                        <tr>
+                            <td><strong>__annotations__</strong></td>
+                            <td>empty</td>
+                            <td>original annotations</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="highlight">
+                    <strong>Best Practice:</strong> Always use @functools.wraps in your decorators!
+                </div>
+            </div>
+
+            <!-- Metadata Tab -->
+            <div id="internals-metadata" class="tab-content">
+                <h3>Function Metadata:</h3>
+
+                <div class="code-block"><pre><code>
+def example(a: int, b: str) -> str:
+    """Example function with type hints"""
+    return b * a
+
+# Inspect function metadata
+print(example.__name__)           # 'example'
+print(example.__doc__)            # 'Example function with type hints'
+print(example.__module__)         # '__main__'
+print(example.__qualname__)       # 'example'
+print(example.__annotations__)    # {'a': int, 'b': str, 'return': str}
+print(example.__code__.co_varnames)  # ('a', 'b')
+print(example.__code__.co_argcount)  # 2
+                </code></pre></div>
+
+                <h3>Preserving Signature:</h3>
+
+                <div class="code-block"><pre><code>
+import inspect
+from functools import wraps
+
+def signature_aware_decorator(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        # Get original signature
+        sig = inspect.signature(func)
+        print(f"Calling {func.__name__}{sig}")
+        return func(*args, **kwargs)
+    return wrapper
+
+@signature_aware_decorator
+def multiply(x: int, y: int) -> int:
+    """Multiply two numbers"""
+    return x * y
+
+multiply(3, 4)
+# Output: Calling multiply(x: int, y: int) -> int
+                </code></pre></div>
+            </div>
+        </section>
+
+        <!-- Decorators with Parameters -->
+        <section id="parameters" class="card">
+            <h2>🎛️ Decorators with Parameters</h2>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab(event, 'params-intro')">Intro</button>
+                <button class="tab-btn" onclick="switchTab(event, 'params-factory')">Factory</button>
+                <button class="tab-btn" onclick="switchTab(event, 'params-class')">Class-Based</button>
+            </div>
+
+            <!-- Intro Tab -->
+            <div id="params-intro" class="tab-content active">
+                <h3>The Problem:</h3>
+
+                <div class="definition">
+                    <strong>Challenge:</strong> How do you pass parameters to a decorator?
+                </div>
+
+                <div class="code-block"><pre><code>
+# ❌ This doesn't work - @ expects a decorator, not parameters
+@my_decorator(some_parameter)
+def my_function():
+    pass
+
+# But we need parameters for:
+# - Logging levels
+# - Timeout values
+# - Number of retries
+# - API keys
+                </code></pre></div>
+
+                <h3>Three-Layer Solution:</h3>
+
+                <div class="layer-diagram">
+                    <div class="layer">Layer 1: Parameters → decorator_factory(param)</div>
+                    <div class="layer">Layer 2: Decorator → actual_decorator(func)</div>
+                    <div class="layer">Layer 3: Wrapper → wrapper(*args, **kwargs)</div>
+                </div>
+
+                <h3>Example:</h3>
+
+                <div class="code-block"><pre><code>
+# Three functions stacked
+def decorator_factory(parameter):          # Layer 1: Accept parameters
+    def actual_decorator(func):            # Layer 2: Accept function
+        def wrapper(*args, **kwargs):      # Layer 3: Execute with logic
+            print(f"Parameter: {parameter}")
+            return func(*args, **kwargs)
+        return wrapper
+    return actual_decorator
+
+# Usage:
+@decorator_factory("some value")
+def greet(name):
+    return f"Hello {name}"
+
+greet("Alice")
+# Output:
+# Parameter: some value
+# Hello Alice
+                </code></pre></div>
+            </div>
+
+            <!-- Factory Tab -->
+            <div id="params-factory" class="tab-content">
+                <h3>Decorator Factories in Detail:</h3>
+
+                <h4 style="color: var(--primary); margin: 1.5rem 0 0.5rem 0;">Example 1: Rate Limiter</h4>
+
+                <div class="code-block"><pre><code>
+from functools import wraps
+import time
+
+def rate_limit(calls_per_second):
+    """Limit function calls to N per second"""
+
+    def decorator(func):
+        last_called = [0.0]  # Mutable default
+
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            elapsed = time.time() - last_called[0]
+            min_interval = 1.0 / calls_per_second
+
+            if elapsed < min_interval:
+                time.sleep(min_interval - elapsed)
+
+            result = func(*args, **kwargs)
+            last_called[0] = time.time()
+            return result
+
+        return wrapper
+    return decorator
+
+@rate_limit(2)  # Max 2 calls per second
+def api_call():
+    print("API called")
+
+api_call()  # Immediate
+api_call()  # Immediate
+api_call()  # Waits 0.5 seconds
+                </code></pre></div>
+
+                <h4 style="color: var(--primary); margin: 1.5rem 0 0.5rem 0;">Example 2: Retry Logic</h4>
+
+                <div class="code-block"><pre><code>
+def retry(max_attempts=3, delay=1):
+    """Retry function if it fails"""
+
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            for attempt in range(max_attempts):
+                try:
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    if attempt == max_attempts - 1:
+                        raise
+                    print(f"Attempt {attempt+1} failed: {e}. Retrying in {delay}s...")
+                    time.sleep(delay)
+
+        return wrapper
+    return decorator
+
+@retry(max_attempts=3, delay=2)
+def unreliable_network_call():
+    import random
+    if random.random() < 0.7:
+                        raise ConnectionError("Network failed")
+    return "Success!"
+                </code></pre></div>
+
+                <h4 style="color: var(--primary); margin: 1.5rem 0 0.5rem 0;">Example 3: Logging with Levels</h4>
+
+                <div class="code-block"><pre><code>
+def log(level="INFO"):
+    """Log function calls at specified level"""
+
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            print(f"[{level}] Calling {func.__name__}({args}, {kwargs})")
+            result = func(*args, **kwargs)
+            print(f"[{level}] {func.__name__} returned {result}")
+            return result
+
+        return wrapper
+    return decorator
+
+@log(level="DEBUG")
+def process_data(data):
+    return len(data)
+
+process_data([1, 2, 3])
+# Output:
+# [DEBUG] Calling process_data(([1, 2, 3],), {})
+# [DEBUG] process_data returned 3
+                </code></pre></div>
+            </div>
+
+            <!-- Class-Based Tab -->
+            <div id="params-class" class="tab-content">
+                <h3>Class-Based Decorators:</h3>
+
+                <div class="definition">
+                    <strong>Class Decorator:</strong> Use __init__ to store parameters and __call__ to wrap the function.
+                </div>
+
+                <h3>Basic Class Decorator:</h3>
+
+                <div class="code-block"><pre><code>
+class CountCalls:
+    """Count how many times a function is called"""
+
+    def __init__(self, func):
+        self.func = func
+        self.count = 0
+
+    def __call__(self, *args, **kwargs):
+        self.count += 1
+        print(f"Call {self.count}: {self.func.__name__}")
+        return self.func(*args, **kwargs)
+
+@CountCalls
+def greet(name):
+    return f"Hello {name}"
+
+greet("Alice")   # Call 1: greet
+greet("Bob")     # Call 2: greet
+                </code></pre></div>
+
+                <h3>Class Decorator with Parameters:</h3>
+
+                <div class="code-block"><pre><code>
+class Timer:
+    """Time function execution"""
+
+    def __init__(self, unit="seconds"):
+        self.unit = unit
+
+    def __call__(self, func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            import time
+            start = time.time()
+            result = func(*args, **kwargs)
+            elapsed = time.time() - start
+
+            if self.unit == "ms":
+                elapsed *= 1000
+
+            print(f"{func.__name__} took {elapsed:.2f} {self.unit}")
+            return result
+
+        return wrapper
+
+@Timer(unit="ms")
+def slow_function():
+    import time
+    time.sleep(0.1)
+    return "Done"
+
+slow_function()  # slow_function took 100.50 ms
+                </code></pre></div>
+
+                <h3>Class Decorators vs Function Decorators:</h3>
+
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th>Function</th>
+                            <th>Class</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>State</strong></td>
+                            <td>Limited (closure)</td>
+                            <td>Easy (attributes)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Parameters</strong></td>
+                            <td>Needs 3 layers</td>
+                            <td>In __init__</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Readability</strong></td>
+                            <td>Functional style</td>
+                            <td>OOP style</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Complexity</strong></td>
+                            <td>Simpler</td>
+                            <td>More complex</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Advanced Patterns -->
+        <section id="advanced" class="card">
+            <h2>⚡ Advanced Patterns</h2>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab(event, 'adv-chaining')">Chaining</button>
+                <button class="tab-btn" onclick="switchTab(event, 'adv-stacking')">Stacking</button>
+                <button class="tab-btn" onclick="switchTab(event, 'adv-class')">Class Decorators</button>
+            </div>
+
+            <!-- Chaining Tab -->
+            <div id="adv-chaining" class="tab-content active">
+                <h3>Decorator Composition:</h3>
+
+                <div class="code-block"><pre><code>
+from functools import wraps
+
+def timing(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        import time
+        start = time.time()
+        result = func(*args, **kwargs)
+        print(f"Took {time.time() - start:.4f}s")
+        return result
+    return wrapper
+
+def logging(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        print(f"Calling {func.__name__}({args}, {kwargs})")
+        return func(*args, **kwargs)
+    return wrapper
+
+# Stack multiple decorators
+@timing
+@logging
+def process(n):
+    return sum(range(n))
+
+process(1000)
+# Output:
+# Calling process((1000,), {})
+# Took 0.0001s
+                </code></pre></div>
+
+                <h3>Order Matters:</h3>
+
+                <div class="decorator-chain">
+                    <div class="chain-box">@timing<br>@logging<br>def process(): ...</div>
+                    <div class="flow-arrow">↓ Equivalent to:</div>
+                    <div class="chain-box">process = timing(logging(process))</div>
+                    <div class="flow-arrow">↓ Execution order:</div>
+                    <div class="chain-box">timing_wrapper → logging_wrapper → original</div>
+                </div>
+
+                <h3>Flexible Decorator Composition:</h3>
+
+                <div class="code-block"><pre><code>
+def compose(*decorators):
+    """Compose multiple decorators"""
+    def composed(func):
+        for decorator in reversed(decorators):
+            func = decorator(func)
+        return func
+    return composed
+
+# Use:
+@compose(timing, logging, retry(max_attempts=3))
+def my_function():
+    pass
+                </code></pre></div>
+            </div>
+
+            <!-- Stacking Tab -->
+            <div id="adv-stacking" class="tab-content">
+                <h3>Conditional Decorators:</h3>
+
+                <div class="code-block"><pre><code>
+def debug_only(func):
+    """Only decorate in debug mode"""
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        import sys
+        if '--debug' in sys.argv:
+            print(f"DEBUG: {func.__name__}")
+        return func(*args, **kwargs)
+    return wrapper
+
+@debug_only
+def process():
+    return "Processing..."
+
+# Run with --debug flag to see debug output
+                </code></pre></div>
+
+                <h3>Stacking Decorators Dynamically:</h3>
+
+                <div class="code-block"><pre><code>
+def apply_decorators(func, *decorators):
+    """Apply decorators dynamically at runtime"""
+    for decorator in decorators:
+        func = decorator(func)
+    return func
+
+def bold(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        return f"<b>{func(*args, **kwargs)}</b>"
+    return wrapper
+
+def italic(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        return f"<i>{func(*args, **kwargs)}</i>"
+    return wrapper
+
+def format_text():
+    return "Hello"
+
+# Apply decorators dynamically
+formatted = apply_decorators(format_text, italic, bold)
+print(formatted())  # <b><i>Hello</i></b>
+                </code></pre></div>
+            </div>
+
+            <!-- Class Decorators Tab -->
+            <div id="adv-class" class="tab-content">
+                <h3>Decorating Classes:</h3>
+
+                <div class="code-block"><pre><code>
+def add_repr(cls):
+    """Add __repr__ method to class"""
+    def __repr__(self):
+        attrs = ', '.join(f"{k}={v!r}" for k, v in self.__dict__.items())
+        return f"{cls.__name__}({attrs})"
+
+    cls.__repr__ = __repr__
+    return cls
+
+@add_repr
+class Person:
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+
+p = Person("Alice", 30)
+print(p)  # Person(name='Alice', age=30)
+                </code></pre></div>
+
+                <h3>Singleton Pattern with Decorator:</h3>
+
+                <div class="code-block"><pre><code>
+def singleton(cls):
+    """Ensure only one instance of class exists"""
+    instances = {}
+
+    def get_instance(*args, **kwargs):
+        if cls not in instances:
+            instances[cls] = cls(*args, **kwargs)
+        return instances[cls]
+
+    return get_instance
+
+@singleton
+class Database:
+    def __init__(self, host):
+        self.host = host
+
+db1 = Database("localhost")
+db2 = Database("localhost")
+print(db1 is db2)  # True - same instance!
+                </code></pre></div>
+
+                <h3>Dataclass-like Decorator:</h3>
+
+                <div class="code-block"><pre><code>
+def auto_init(cls):
+    """Auto-generate __init__ from class attributes"""
+    def __init__(self, **kwargs):
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
+    cls.__init__ = __init__
+    return cls
+
+@auto_init
+class Config:
+    db_host: str
+    db_port: int
+    debug: bool
+
+config = Config(db_host="localhost", db_port=5432, debug=True)
+print(config.db_host)  # localhost
+                </code></pre></div>
+            </div>
+        </section>
+
+        <!-- Production Example -->
+        <section id="production" class="card">
+            <h2>🚀 Production Example: API Rate Limiter</h2>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab(event, 'prod-overview')">Overview</button>
+                <button class="tab-btn" onclick="switchTab(event, 'prod-code')">Code</button>
+                <button class="tab-btn" onclick="switchTab(event, 'prod-advanced')">Advanced</button>
+            </div>
+
+            <!-- Overview Tab -->
+            <div id="prod-overview" class="tab-content active">
+                <h3>Real-World Scenario:</h3>
+
+                <div class="definition">
+                    <strong>Challenge:</strong> API allows 100 requests per minute. Need to rate limit decorated functions automatically.
+                </div>
+
+                <h3>Requirements:</h3>
+                <ul style="margin-left: 2rem; margin-top: 1rem;">
+                    <li>✅ Track request count per minute</li>
+                    <li>✅ Throttle/queue requests when limit hit</li>
+                    <li>✅ Per-endpoint rate limits</li>
+                    <li>✅ Reset counter every minute</li>
+                    <li>✅ Log rate limit violations</li>
+                    <li>✅ Return error when limit exceeded</li>
+                </ul>
+            </div>
+
+            <!-- Code Tab -->
+            <div id="prod-code" class="tab-content">
+                <h3>Production Rate Limiter:</h3>
+
+                <div class="code-block"><pre><code>
+import time
+from functools import wraps
+from threading import Lock
+from collections import defaultdict
+
+class RateLimiter:
+    """Thread-safe rate limiter decorator"""
+
+    def __init__(self, calls_per_minute=100, delay=0):
+        self.calls_per_minute = calls_per_minute
+        self.delay = delay
+        self.lock = Lock()
+        self.call_times = defaultdict(list)
+
+    def __call__(self, func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            with self.lock:
+                now = time.time()
+                endpoint = func.__name__
+
+                # Remove old call timestamps (older than 1 minute)
+                cutoff = now - 60
+                self.call_times[endpoint] = [
+                    t for t in self.call_times[endpoint] if t > cutoff
+                ]
+
+                # Check if limit exceeded
+                if len(self.call_times[endpoint]) >= self.calls_per_minute:
+                    oldest = self.call_times[endpoint][0]
+                    wait_time = 60 - (now - oldest)
+                    raise RateLimitError(
+                        f"Rate limit exceeded. Retry after {wait_time:.1f}s"
+                    )
+
+                # Record this call
+                self.call_times[endpoint].append(now)
+
+            # Apply delay if configured
+            if self.delay:
+                time.sleep(self.delay)
+
+            try:
+                return func(*args, **kwargs)
+            except Exception as e:
+                # Log error but still count the request
+                print(f"API Error: {e}")
+                raise
+
+        return wrapper
+
+class RateLimitError(Exception):
+    """Raised when rate limit exceeded"""
+    pass
+
+# Usage examples:
+
+limiter_100 = RateLimiter(calls_per_minute=100)
+limiter_10 = RateLimiter(calls_per_minute=10)
+
+@limiter_100
+def get_user(user_id):
+    """Get user from API - 100 req/min limit"""
+    return f"User {user_id}"
+
+@limiter_10
+def create_order(data):
+    """Create order - 10 req/min limit"""
+    return f"Order created: {data}"
+
+# In production:
+try:
+    user = get_user(123)
+except RateLimitError as e:
+    print(f"API rate limit hit: {e}")
+                </code></pre></div>
+
+                <div class="highlight">
+                    <strong>Key Features:</strong><br>
+                    • Thread-safe with Lock<br>
+                    • Time-window tracking<br>
+                    • Per-endpoint limits<br>
+                    • Automatic cleanup of old timestamps<br>
+                    • Reusable for multiple endpoints
+                </div>
+            </div>
+
+            <!-- Advanced Tab -->
+            <div id="prod-advanced" class="tab-content">
+                <h3>Advanced: Circuit Breaker Pattern</h3>
+
+                <div class="code-block"><pre><code>
+from enum import Enum
+import time
+
+class CircuitState(Enum):
+    CLOSED = "closed"      # Working normally
+    OPEN = "open"         # Failing, reject requests
+    HALF_OPEN = "half_open"  # Testing if recovered
+
+class CircuitBreaker:
+    """
+    Automatically fail fast when service is down
+    Prevents cascading failures
+    """
+
+    def __init__(self, failure_threshold=5, timeout=60):
+        self.failure_threshold = failure_threshold
+        self.timeout = timeout
+        self.failure_count = 0
+        self.last_failure_time = None
+        self.state = CircuitState.CLOSED
+
+    def __call__(self, func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            if self.state == CircuitState.OPEN:
+                # Check if we should try again
+                if time.time() - self.last_failure_time > self.timeout:
+                    self.state = CircuitState.HALF_OPEN
+                else:
+                    raise Exception(f"Circuit OPEN. Service unavailable.")
+
+            try:
+                result = func(*args, **kwargs)
+                # Success - reset
+                self.failure_count = 0
+                self.state = CircuitState.CLOSED
+                return result
+
+            except Exception as e:
+                # Failure - increment counter
+                self.failure_count += 1
+                self.last_failure_time = time.time()
+
+                if self.failure_count >= self.failure_threshold:
+                    self.state = CircuitState.OPEN
+                    print(f"Circuit OPEN after {self.failure_count} failures")
+
+                raise
+
+        return wrapper
+
+# Usage:
+breaker = CircuitBreaker(failure_threshold=3, timeout=30)
+
+@breaker
+def external_api_call():
+    # If fails 3 times, circuit opens for 30 seconds
+    import random
+    if random.random() < 0.5:
+        raise Exception("API failed")
+    return "Success"
+                </code></pre></div>
+
+                <div class="key-points">
+                    <h3>Production Decorator Best Practices:</h3>
+                    <ul>
+                        <li><strong>Always use @functools.wraps</strong> to preserve metadata</li>
+                        <li><strong>Thread-safe:</strong> Use locks for shared state</li>
+                        <li><strong>Error handling:</strong> Gracefully handle exceptions</li>
+                        <li><strong>Logging:</strong> Log entry, exit, errors</li>
+                        <li><strong>Performance:</strong> Minimize overhead</li>
+                        <li><strong>Documentation:</strong> Clear docstrings</li>
+                        <li><strong>Testability:</strong> Easy to test decorated functions</li>
+                        <li><strong>Composition:</strong> Work well with other decorators</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Demo Section -->
+        <section id="demo" class="card">
+            <h2>🎮 Interactive Demo</h2>
+
+            <div style="background: rgba(51, 65, 85, 0.5); border: 2px solid var(--border); border-radius: 8px; padding: 2rem; margin: 1.5rem 0;">
+                <h3 style="color: var(--primary); margin-bottom: 1rem;">Try Different Decorators:</h3>
+
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+                    <button onclick="demoSimpleDecorator()">Simple Decorator</button>
+                    <button onclick="demoTimingDecorator()">⏱️ Timing Decorator</button>
+                    <button onclick="demoLoggingDecorator()">📝 Logging Decorator</button>
+                    <button onclick="demoMultipleDecorators()">🎁 Multiple Decorators</button>
+                    <button onclick="demoParameterDecorator()">🎛️ Parameter Decorator</button>
+                    <button onclick="clearDemoOutput()">🗑️ Clear Output</button>
+                </div>
+
+                <div class="output" id="demoOutput">Click a button to run a demo...</div>
+            </div>
+        </section>
+
+        <!-- Key Takeaways -->
+        <section class="card">
+            <h2>📝 Key Takeaways</h2>
+
+            <div class="key-points">
+                <ul>
+                    <li><strong>Decorator:</strong> Function that wraps another function to add behavior</li>
+                    <li><strong>Closure:</strong> Inner function remembers outer function's variables</li>
+                    <li><strong>@ Syntax:</strong> Syntactic sugar for function_name = decorator(function_name)</li>
+                    <li><strong>Higher-Order Function:</strong> Function that takes/returns functions</li>
+                    <li><strong>*args, **kwargs:</strong> Capture any function arguments</li>
+                    <li><strong>@functools.wraps:</strong> Preserve metadata (__name__, __doc__, etc.)</li>
+                    <li><strong>Decorator Factory:</strong> 3-layer function for parameterized decorators</li>
+                    <li><strong>Class Decorators:</strong> Use __init__ for params, __call__ for logic</li>
+                    <li><strong>Stacking:</strong> Apply multiple decorators (bottom-to-top)</li>
+                    <li><strong>Production Use:</strong> Rate limiting, retry logic, logging, caching</li>
+                </ul>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>🎀 Python Decorators Educational Hub | Master Metaprogramming & Higher-Order Functions</p>
+        <p style="margin-top: 1rem; color: var(--text-secondary); font-size: 0.9rem;">
+            Understanding closures, factory patterns, and production decorators → Expert Python Skills 💡
+        </p>
+    </footer>
+
+    <script>
+        function switchTab(event, tabName) {
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(c => c.classList.remove('active'));
+
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(b => b.classList.remove('active'));
+
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function scrollTo(id) {
+            const element = document.getElementById(id);
+            element.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function addOutput(text, style = 'normal') {
+            const output = document.getElementById('demoOutput');
+            const line = document.createElement('div');
+
+            if (style === 'info') line.style.color = 'var(--primary)';
+            else if (style === 'success') line.style.color = 'var(--success)';
+            else if (style === 'code') {
+                line.style.fontFamily = 'monospace';
+                line.style.fontSize = '0.9rem';
+            }
+
+            line.textContent = text;
+            output.appendChild(line);
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function clearDemoOutput() {
+            document.getElementById('demoOutput').innerHTML = '';
+        }
+
+        function demoSimpleDecorator() {
+            clearDemoOutput();
+            addOutput('def my_decorator(func):', 'code');
+            addOutput('    def wrapper():', 'code');
+            addOutput('        print("Before")', 'code');
+            addOutput('        func()', 'code');
+            addOutput('        print("After")', 'code');
+            addOutput('    return wrapper', 'code');
+            addOutput('', 'normal');
+            addOutput('@my_decorator', 'code');
+            addOutput('def say_hello():', 'code');
+            addOutput('    print("Hello!")', 'code');
+            addOutput('', 'normal');
+            addOutput('say_hello()', 'info');
+            addOutput('', 'normal');
+            addOutput('Output:', 'success');
+            addOutput('Before', 'normal');
+            addOutput('Hello!', 'normal');
+            addOutput('After', 'normal');
+        }
+
+        function demoTimingDecorator() {
+            clearDemoOutput();
+            addOutput('from functools import wraps', 'code');
+            addOutput('import time', 'code');
+            addOutput('', 'normal');
+            addOutput('def timing(func):', 'code');
+            addOutput('    @wraps(func)', 'code');
+            addOutput('    def wrapper(*args, **kwargs):', 'code');
+            addOutput('        start = time.time()', 'code');
+            addOutput('        result = func(*args, **kwargs)', 'code');
+            addOutput('        elapsed = time.time() - start', 'code');
+            addOutput('        print(f"Time: {elapsed:.4f}s")', 'code');
+            addOutput('        return result', 'code');
+            addOutput('    return wrapper', 'code');
+            addOutput('', 'normal');
+            addOutput('@timing', 'code');
+            addOutput('def process():', 'code');
+            addOutput('    return sum(range(1000000))', 'code');
+            addOutput('', 'normal');
+            addOutput('process()', 'info');
+            addOutput('', 'normal');
+            addOutput('Output:', 'success');
+            addOutput('Time: 0.0234s', 'normal');
+        }
+
+        function demoLoggingDecorator() {
+            clearDemoOutput();
+            addOutput('def logging_decorator(func):', 'code');
+            addOutput('    @wraps(func)', 'code');
+            addOutput('    def wrapper(*args, **kwargs):', 'code');
+            addOutput('        print(f"Calling {func.__name__}")', 'code');
+            addOutput('        result = func(*args, **kwargs)', 'code');
+            addOutput('        print(f"Returned {result}")', 'code');
+            addOutput('        return result', 'code');
+            addOutput('    return wrapper', 'code');
+            addOutput('', 'normal');
+            addOutput('@logging_decorator', 'code');
+            addOutput('def add(a, b):', 'code');
+            addOutput('    return a + b', 'code');
+            addOutput('', 'normal');
+            addOutput('add(3, 5)', 'info');
+            addOutput('', 'normal');
+            addOutput('Output:', 'success');
+            addOutput('Calling add', 'normal');
+            addOutput('Returned 8', 'normal');
+        }
+
+        function demoMultipleDecorators() {
+            clearDemoOutput();
+            addOutput('def bold(func):', 'code');
+            addOutput('    @wraps(func)', 'code');
+            addOutput('    def wrapper():', 'code');
+            addOutput('        return f"<b>{func()}</b>"', 'code');
+            addOutput('    return wrapper', 'code');
+            addOutput('', 'normal');
+            addOutput('def italic(func):', 'code');
+            addOutput('    @wraps(func)', 'code');
+            addOutput('    def wrapper():', 'code');
+            addOutput('        return f"<i>{func()}</i>"', 'code');
+            addOutput('    return wrapper', 'code');
+            addOutput('', 'normal');
+            addOutput('@bold', 'code');
+            addOutput('@italic', 'code');
+            addOutput('def text():', 'code');
+            addOutput('    return "Hello"', 'code');
+            addOutput('', 'normal');
+            addOutput('text()', 'info');
+            addOutput('', 'normal');
+            addOutput('Output:', 'success');
+            addOutput('<b><i>Hello</i></b>', 'normal');
+            addOutput('', 'normal');
+            addOutput('Note: italic applied first (bottom), then bold', 'success');
+        }
+
+        function demoParameterDecorator() {
+            clearDemoOutput();
+            addOutput('def repeat(n):', 'code');
+            addOutput('    def decorator(func):', 'code');
+            addOutput('        @wraps(func)', 'code');
+            addOutput('        def wrapper(*args, **kwargs):', 'code');
+            addOutput('            results = []', 'code');
+            addOutput('            for i in range(n):', 'code');
+            addOutput('                results.append(func(*args, **kwargs))', 'code');
+            addOutput('            return results', 'code');
+            addOutput('        return wrapper', 'code');
+            addOutput('    return decorator', 'code');
+            addOutput('', 'normal');
+            addOutput('@repeat(3)', 'code');
+            addOutput('def hello():', 'code');
+            addOutput('    return "Hi"', 'code');
+            addOutput('', 'normal');
+            addOutput('print(hello())', 'info');
+            addOutput('', 'normal');
+            addOutput('Output:', 'success');
+            addOutput('["Hi", "Hi", "Hi"]', 'normal');
+        }
+    </script>
+</body>
+</html>
