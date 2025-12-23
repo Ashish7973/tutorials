@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask vs FastAPI - Complete Tutorial</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --flask: #0099cc;
+            --fastapi: #009485;
+            --primary: #0099cc;
+            --secondary: #0077aa;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --dark-bg: #0f172a;
+            --light-bg: #1e293b;
+            --card-bg: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --border: #475569;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #1a293e 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        nav {
+            position: sticky;
+            top: 0;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            z-index: 100;
+            padding: 1rem 0;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .nav-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #0099cc, #009485);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            list-style: none;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 4rem 0;
+            margin-bottom: 3rem;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .hero .tagline {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: linear-gradient(135deg, rgba(51, 65, 85, 0.5) 0%, rgba(30, 41, 59, 0.5) 100%);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 8px 25px rgba(0, 153, 204, 0.15);
+        }
+
+        .card h2 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+        }
+
+        .card h3 {
+            color: var(--primary);
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 1rem;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: 2px solid var(--border);
+            color: var(--text-secondary);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .tab-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .definition {
+            background: rgba(0, 153, 204, 0.1);
+            border-left: 4px solid var(--primary);
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 6px;
+        }
+
+        .code-block {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+
+        .code-block code {
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        .highlight {
+            background: rgba(0, 153, 204, 0.1);
+            border-left: 4px solid var(--warning);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+            color: var(--text-secondary);
+        }
+
+        .key-points {
+            background: rgba(0, 153, 204, 0.05);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .key-points h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .key-points ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .key-points li {
+            padding: 0.5rem 0;
+            padding-left: 2rem;
+            position: relative;
+            color: var(--text-secondary);
+        }
+
+        .key-points li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .comparison-table th {
+            background: rgba(0, 153, 204, 0.2);
+            color: var(--primary);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .comparison-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .side-box {
+            background: rgba(51, 65, 85, 0.5);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .side-box h4 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            margin-right: 0.5rem;
+        }
+
+        .badge-flask {
+            background: rgba(0, 153, 204, 0.2);
+            color: var(--flask);
+        }
+
+        .badge-fastapi {
+            background: rgba(0, 148, 133, 0.2);
+            color: var(--fastapi);
+        }
+
+        .code-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .code-comparison > div {
+            background: rgba(51, 65, 85, 0.5);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .code-comparison > div h4 {
+            margin-bottom: 1rem;
+            color: var(--primary);
+            text-align: center;
+        }
+
+        .code-comparison code {
+            font-size: 0.8rem;
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        button:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 153, 204, 0.3);
+        }
+
+        .output {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+            min-height: 150px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            max-height: 400px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 3rem 0;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border);
+            margin-top: 4rem;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+
+            .code-comparison {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-links {
+                gap: 0.5rem;
+                font-size: 0.8rem;
+            }
+        }
+
+        .perf-chart {
+            background: rgba(51, 65, 85, 0.5);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .perf-item {
+            margin: 1rem 0;
+        }
+
+        .perf-label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .perf-bar {
+            background: rgba(0, 153, 204, 0.2);
+            height: 30px;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .perf-fill {
+            background: linear-gradient(90deg, #0099cc, #009485);
+            height: 100%;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            padding-left: 1rem;
+            color: white;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <div class="nav-title">🚀 Flask vs FastAPI</div>
+            <ul class="nav-links">
+                <li><a href="#intro">Intro</a></li>
+                <li><a href="#flask">Flask</a></li>
+                <li><a href="#fastapi">FastAPI</a></li>
+                <li><a href="#comparison">Compare</a></li>
+                <li><a href="#production">Production</a></li>
+                <li><a href="#demo">Demo</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Hero -->
+        <section class="hero">
+            <h1>Flask vs FastAPI</h1>
+            <p class="tagline">Complete Comparison: Architecture, Performance, and Production Use Cases</p>
+        </section>
+
+        <!-- Introduction -->
+        <section id="intro" class="card">
+            <h2>🎯 Framework Overview</h2>
+
+            <div class="grid-2">
+                <div class="side-box">
+                    <h4><span class="badge badge-flask">Flask</span></h4>
+                    <p><strong>Type:</strong> Micro Framework</p>
+                    <p><strong>Founded:</strong> 2010</p>
+                    <p><strong>Protocol:</strong> WSGI (synchronous)</p>
+                    <p><strong>Philosophy:</strong> Lightweight, flexible, modular</p>
+                    <p><strong>Best For:</strong> General web apps, REST APIs, traditional web development</p>
+                </div>
+
+                <div class="side-box">
+                    <h4><span class="badge badge-fastapi">FastAPI</span></h4>
+                    <p><strong>Type:</strong> Full-Stack Framework</p>
+                    <p><strong>Founded:</strong> 2018</p>
+                    <p><strong>Protocol:</strong> ASGI (asynchronous)</p>
+                    <p><strong>Philosophy:</strong> Modern, fast, automatic validation & docs</p>
+                    <p><strong>Best For:</strong> High-concurrency APIs, microservices, real-time apps</p>
+                </div>
+            </div>
+
+            <h3>When to Use Which:</h3>
+
+            <div class="comparison-table"><table>
+                <thead>
+                    <tr>
+                        <th>Scenario</th>
+                        <th>Flask ✓</th>
+                        <th>FastAPI ✓</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Learning Python web dev</strong></td>
+                        <td>✅ Simpler to learn</td>
+                        <td>❌ More complex initially</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Traditional web apps with templates</strong></td>
+                        <td>✅ Built-in Jinja2</td>
+                        <td>❌ Not designed for this</td>
+                    </tr>
+                    <tr>
+                        <td><strong>REST API (low traffic)</strong></td>
+                        <td>✅ Simple to setup</td>
+                        <td>✅ Also good, better validation</td>
+                    </tr>
+                    <tr>
+                        <td><strong>High-concurrency API (10k+ req/s)</strong></td>
+                        <td>❌ Requires horizontal scaling</td>
+                        <td>✅ Built for this</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Real-time WebSockets</strong></td>
+                        <td>⚠️ Possible but complex</td>
+                        <td>✅ Native support</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Auto-generated API docs</strong></td>
+                        <td>❌ Need third-party</td>
+                        <td>✅ Built-in Swagger/OpenAPI</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Type hints & validation</strong></td>
+                        <td>❌ Manual validation</td>
+                        <td>✅ Automatic with Pydantic</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Async/await support</strong></td>
+                        <td>⚠️ Limited, since 1.0</td>
+                        <td>✅ Native, recommended</td>
+                    </tr>
+                </tbody>
+            </table></div>
+        </section>
+
+        <!-- Flask Section -->
+        <section id="flask" class="card">
+            <h2>🅰️ Flask Deep Dive</h2>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab(event, 'flask-basics')">Basics</button>
+                <button class="tab-btn" onclick="switchTab(event, 'flask-arch')">Architecture</button>
+                <button class="tab-btn" onclick="switchTab(event, 'flask-patterns')">Patterns</button>
+            </div>
+
+            <!-- Basics Tab -->
+            <div id="flask-basics" class="tab-content active">
+                <h3>Simple Flask App:</h3>
+
+                <div class="code-block"><pre><code>
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+# Basic route
+@app.route('/')
+def hello():
+    return {'message': 'Hello World'}
+
+# Route with parameters
+@app.route('/users/<int:user_id>')
+def get_user(user_id):
+    return {'user_id': user_id, 'name': 'Alice'}
+
+# POST request
+@app.post('/users')
+def create_user():
+    data = request.json
+    return {'id': 1, **data}, 201
+
+# Error handling
+@app.errorhandler(404)
+def not_found(error):
+    return {'error': 'Not found'}, 404
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)
+                </code></pre></div>
+
+                <h3>Run With:</h3>
+                <div class="code-block"><pre><code>
+# Development
+python app.py
+
+# Production (Gunicorn)
+gunicorn -w 4 -b 0.0.0.0:5000 app:app
+                </code></pre></div>
+
+                <div class="highlight">
+                    <strong>Key Points:</strong><br>
+                    • Simple decorator-based routing<br>
+                    • Synchronous request handling<br>
+                    • Manual JSON parsing (request.json)<br>
+                    • No built-in validation<br>
+                    • Requires Gunicorn/uWSGI for production
+                </div>
+            </div>
+
+            <!-- Architecture Tab -->
+            <div id="flask-arch" class="tab-content">
+                <h3>Request Lifecycle:</h3>
+
+                <div style="background: rgba(51, 65, 85, 0.5); border: 2px solid var(--border); border-radius: 8px; padding: 2rem; margin: 1.5rem 0;">
+                    <div style="font-size: 0.9rem; line-height: 2;">
+                        <div><strong style="color: var(--primary);">1. Request arrives at WSGI server</strong></div>
+                        <div style="margin-left: 1.5rem; color: var(--text-secondary);">Gunicorn/uWSGI receives HTTP request</div>
+
+                        <div style="margin-top: 1rem;"><strong style="color: var(--primary);">2. App context pushed</strong></div>
+                        <div style="margin-left: 1.5rem; color: var(--text-secondary);">Request context created, g object available</div>
+
+                        <div style="margin-top: 1rem;"><strong style="color: var(--primary);">3. before_request handlers</strong></div>
+                        <div style="margin-left: 1.5rem; color: var(--text-secondary);">@app.before_request decorated functions run</div>
+
+                        <div style="margin-top: 1rem;"><strong style="color: var(--primary);">4. URL routing & dispatch</strong></div>
+                        <div style="margin-left: 1.5rem; color: var(--text-secondary);">Flask finds matching route</div>
+
+                        <div style="margin-top: 1rem;"><strong style="color: var(--primary);">5. View function executes</strong></div>
+                        <div style="margin-left: 1.5rem; color: var(--text-secondary);">Route handler processes request synchronously</div>
+
+                        <div style="margin-top: 1rem;"><strong style="color: var(--primary);">6. Response returned</strong></div>
+                        <div style="margin-left: 1.5rem; color: var(--text-secondary);">View returns data, converted to Response object</div>
+
+                        <div style="margin-top: 1rem;"><strong style="color: var(--primary);">7. after_request handlers</strong></div>
+                        <div style="margin-left: 1.5rem; color: var(--text-secondary);">Modify response before sending</div>
+
+                        <div style="margin-top: 1rem;"><strong style="color: var(--primary);">8. Response sent to client</strong></div>
+                        <div style="margin-left: 1.5rem; color: var(--text-secondary);">HTTP response transmitted</div>
+                    </div>
+                </div>
+
+                <h3>Blueprints (Modular Organization):</h3>
+
+                <div class="code-block"><pre><code>
+# users/routes.py
+from flask import Blueprint
+
+users_bp = Blueprint('users', __name__, url_prefix='/users')
+
+@users_bp.route('/')
+def list_users():
+    return {'users': []}
+
+@users_bp.route('/<int:user_id>')
+def get_user(user_id):
+    return {'id': user_id}
+
+# app.py
+from flask import Flask
+from users.routes import users_bp
+
+app = Flask(__name__)
+app.register_blueprint(users_bp)
+
+# Routes available at /users/
+                </code></pre></div>
+            </div>
+
+            <!-- Patterns Tab -->
+            <div id="flask-patterns" class="tab-content">
+                <h3>Application Factory Pattern:</h3>
+
+                <div class="code-block"><pre><code>
+# config.py
+class Config:
+    DEBUG = False
+    TESTING = False
+
+class DevelopmentConfig(Config):
+    DEBUG = True
+
+# app/__init__.py
+from flask import Flask
+from app.users import users_bp
+
+def create_app(config_class=Config):
+    app = Flask(__name__)
+    app.config.from_object(config_class)
+
+    # Register blueprints
+    app.register_blueprint(users_bp)
+
+    # Initialize extensions
+    db.init_app(app)
+
+    return app
+
+# Usage
+app = create_app(DevelopmentConfig)
+
+# Testing
+app = create_app(TestConfig)
+                </code></pre></div>
+
+                <h3>Middleware/Error Handling:</h3>
+
+                <div class="code-block"><pre><code>
+from flask import Flask, jsonify
+
+app = Flask(__name__)
+
+@app.before_request
+def check_auth():
+    """Run before each request"""
+    token = request.headers.get('Authorization')
+    if not token:
+        return {'error': 'Unauthorized'}, 401
+
+@app.after_request
+def add_headers(response):
+    """Modify response"""
+    response.headers['X-API-Version'] = '1.0'
+    return response
+
+@app.errorhandler(ValueError)
+def handle_error(error):
+    return {'error': str(error)}, 400
+
+@app.teardown_appcontext
+def cleanup(exception):
+    """Called when request ends"""
+    db.session.close()
+                </code></pre></div>
+            </div>
+        </section>
+
+        <!-- FastAPI Section -->
+        <section id="fastapi" class="card">
+            <h2>⚡ FastAPI Deep Dive</h2>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab(event, 'fastapi-basics')">Basics</button>
+                <button class="tab-btn" onclick="switchTab(event, 'fastapi-arch')">Architecture</button>
+                <button class="tab-btn" onclick="switchTab(event, 'fastapi-async')">Async</button>
+            </div>
+
+            <!-- Basics Tab -->
+            <div id="fastapi-basics" class="tab-content active">
+                <h3>Simple FastAPI App:</h3>
+
+                <div class="code-block"><pre><code>
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+app = FastAPI()
+
+# Pydantic model for validation
+class User(BaseModel):
+    id: int
+    name: str
+    email: str
+
+# Basic route
+@app.get('/')
+async def hello():
+    return {'message': 'Hello World'}
+
+# Route with parameters
+@app.get('/users/{user_id}')
+async def get_user(user_id: int):
+    return {'user_id': user_id, 'name': 'Alice'}
+
+# POST with validation
+@app.post('/users', response_model=User)
+async def create_user(user: User):
+    # user is automatically validated against User schema
+    return user
+
+# Query parameters
+@app.get('/search')
+async def search(q: str, limit: int = 10):
+    return {'query': q, 'limit': limit}
+
+# Error handling
+@app.get('/items/{item_id}')
+async def get_item(item_id: int):
+    if item_id < 0:
+        raise ValueError('Item ID must be positive')
+    return {'item_id': item_id}
+                </code></pre></div>
+
+                <h3>Run With:</h3>
+                <div class="code-block"><pre><code>
+# Development
+uvicorn app:app --reload
+
+# Production
+uvicorn app:app --workers 4 --host 0.0.0.0
+                </code></pre></div>
+
+                <div class="highlight">
+                    <strong>Key Features:</strong><br>
+                    • Automatic request validation (Pydantic)<br>
+                    • Automatic OpenAPI/Swagger docs<br>
+                    • Type hints for documentation<br>
+                    • Async/await by default<br>
+                    • Built-in JSON serialization<br>
+                    • Interactive API documentation at /docs
+                </div>
+            </div>
+
+            <!-- Architecture Tab -->
+            <div id="fastapi-arch" class="tab-content">
+                <h3>Request Lifecycle (ASGI):</h3>
+
+                <div style="background: rgba(51, 65, 85, 0.5); border: 2px solid var(--border); border-radius: 8px; padding: 2rem; margin: 1.5rem 0;">
+                    <div style="font-size: 0.9rem; line-height: 2;">
+                        <div><strong style="color: var(--primary);">1. Request arrives at ASGI server</strong></div>
+                        <div style="margin-left: 1.5rem; color: var(--text-secondary);">Uvicorn receives HTTP request</div>
+
+                        <div style="margin-top: 1rem;"><strong style="color: var(--primary);">2. Middleware chain (top to bottom)</strong></div>
+                        <div style="margin-left: 1.5rem; color: var(--text-secondary);">Middleware can modify request before routing</div>
+
+                        <div style="margin-top: 1rem;"><strong style="color: var(--primary);">3. URL routing & parameter extraction</strong></div>
+                        <div style="margin-left: 1.5rem; color: var(--text-secondary);">FastAPI finds matching route</div>
+
+                        <div style="margin-top: 1rem;"><strong style="color: var(--primary);">4. Request validation</strong></div>
+                        <div style="margin-left: 1.5rem; color: var(--text-secondary);">Pydantic validates path/query/body parameters</div>
+
+                        <div style="margin-top: 1rem;"><strong style="color: var(--primary);">5. Dependency injection</strong></div>
+                        <div style="margin-left: 1.5rem; color: var(--text-secondary);">Resolve dependencies (DB sessions, auth, etc)</div>
+
+                        <div style="margin-top: 1rem;"><strong style="color: var(--primary);">6. Path operation executes</strong></div>
+                        <div style="margin-left: 1.5rem; color: var(--text-secondary);">Async handler runs (can await I/O)</div>
+
+                        <div style="margin-top: 1rem;"><strong style="color: var(--primary);">7. Response serialization</strong></div>
+                        <div style="margin-left: 1.5rem; color: var(--text-secondary);">Return value validated & JSON serialized</div>
+
+                        <div style="margin-top: 1rem;"><strong style="color: var(--primary);">8. Middleware chain (bottom to top)</strong></div>
+                        <div style="margin-left: 1.5rem; color: var(--text-secondary);">Middleware can modify response</div>
+
+                        <div style="margin-top: 1rem;"><strong style="color: var(--primary);">9. Response sent to client</strong></div>
+                        <div style="margin-left: 1.5rem; color: var(--text-secondary);">HTTP response transmitted</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Async Tab -->
+            <div id="fastapi-async" class="tab-content">
+                <h3>Async Request Handling:</h3>
+
+                <div class="code-block"><pre><code>
+import asyncio
+from fastapi import FastAPI
+import httpx
+
+app = FastAPI()
+
+# ✅ Async - doesn't block event loop
+@app.get('/fast')
+async def fast_endpoint():
+    # Can await I/O operations
+    async with httpx.AsyncClient() as client:
+        response = await client.get('https://api.example.com/data')
+    return response.json()
+
+# ❌ Blocking - blocks event loop
+@app.get('/slow')
+def slow_endpoint():
+    import requests
+    response = requests.get('https://api.example.com/data')  # Blocks!
+    return response.json()
+
+# With dependency
+async def get_db():
+    db = await connect_db()
+    try:
+        yield db
+    finally:
+        await db.close()
+
+@app.get('/items')
+async def get_items(db = Depends(get_db)):
+    items = await db.query('SELECT * FROM items')
+    return items
+                </code></pre></div>
+
+                <h3>Performance Comparison:</h3>
+
+                <div class="perf-chart">
+                    <div class="perf-item">
+                        <div class="perf-label">🔄 Flask (WSGI, 4 workers) - 3,000 req/s</div>
+                        <div class="perf-bar">
+                            <div class="perf-fill" style="width: 15%;">3k</div>
+                        </div>
+                    </div>
+
+                    <div class="perf-item">
+                        <div class="perf-label">⚡ FastAPI (ASGI, 1 worker) - 20,000 req/s</div>
+                        <div class="perf-bar">
+                            <div class="perf-fill" style="width: 100%;">20k</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="highlight">
+                    <strong>Why FastAPI is Faster:</strong><br>
+                    • ASGI allows true async concurrency<br>
+                    • Single worker handles 1000s concurrent requests<br>
+                    • Flask WSGI is synchronous, blocks on I/O<br>
+                    • Flask needs 4+ workers to handle same load<br>
+                    • Each worker uses ~50MB RAM (Flask)<br>
+                    • FastAPI uses minimal memory per request
+                </div>
+            </div>
+        </section>
+
+        <!-- Detailed Comparison -->
+        <section id="comparison" class="card">
+            <h2>⚖️ Detailed Feature Comparison</h2>
+
+            <div class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th><span class="badge badge-flask">Flask</span></th>
+                        <th><span class="badge badge-fastapi">FastAPI</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Protocol</strong></td>
+                        <td>WSGI (Synchronous)</td>
+                        <td>ASGI (Asynchronous)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Performance</strong></td>
+                        <td>~3,000 req/s</td>
+                        <td>~20,000 req/s</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Async Support</strong></td>
+                        <td>Limited (added in 2.0)</td>
+                        <td>Native, first-class</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Input Validation</strong></td>
+                        <td>Manual</td>
+                        <td>Automatic (Pydantic)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>API Documentation</strong></td>
+                        <td>Manual/third-party</td>
+                        <td>Auto-generated (Swagger/OpenAPI)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Type Hints</strong></td>
+                        <td>Optional</td>
+                        <td>Required & enforced</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Templating</strong></td>
+                        <td>Jinja2 built-in</td>
+                        <td>Not included</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ORM Support</strong></td>
+                        <td>Flask-SQLAlchemy extension</td>
+                        <td>SQLAlchemy, Tortoise-ORM</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Middleware</strong></td>
+                        <td>before_request/after_request</td>
+                        <td>ASGI middleware</td>
+                    </tr>
+                    <tr>
+                        <td><strong>WebSockets</strong></td>
+                        <td>Flask-SocketIO (limited)</td>
+                        <td>Native support</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Learning Curve</strong></td>
+                        <td>Very easy</td>
+                        <td>Moderate</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Production Ready</strong></td>
+                        <td>Yes (14 years proven)</td>
+                        <td>Yes (modern, fast-growing)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Code Examples Comparison:</h3>
+
+            <div class="code-comparison">
+                <div>
+                    <h4><span class="badge badge-flask">Flask</span></h4>
+                    <div class="code-block"><pre><code style="font-size: 0.75rem;">
+from flask import Flask, request
+
+app = Flask(__name__)
+
+@app.route('/users/<int:id>')
+def get_user(id):
+    # Manual validation
+    if not isinstance(id, int):
+        return {'error': 'Invalid ID'}, 400
+
+    # Manual JSON parsing
+    user = {'id': id, 'name': 'Alice'}
+    return user
+
+# Manual docs
+@app.route('/docs')
+def docs():
+    return {'endpoints': [...]}
+                    </code></pre></div>
+                </div>
+
+                <div>
+                    <h4><span class="badge badge-fastapi">FastAPI</span></h4>
+                    <div class="code-block"><pre><code style="font-size: 0.75rem;">
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+app = FastAPI()
+
+class User(BaseModel):
+    id: int
+    name: str
+
+@app.get('/users/{id}', response_model=User)
+async def get_user(id: int):
+    # Auto validation! ✅
+    # Auto JSON serialization! ✅
+    user = {'id': id, 'name': 'Alice'}
+    return user
+
+# Auto docs at /docs 📚
+                    </code></pre></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Production Examples -->
+        <section id="production" class="card">
+            <h2>🚀 Production Example: User API</h2>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab(event, 'prod-flask')">Flask</button>
+                <button class="tab-btn" onclick="switchTab(event, 'prod-fastapi')">FastAPI</button>
+            </div>
+
+            <!-- Flask Example -->
+            <div id="prod-flask" class="tab-content active">
+                <h3>Flask User API:</h3>
+
+                <div class="code-block"><pre><code>
+from flask import Flask, request, jsonify
+from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS
+
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
+db = SQLAlchemy(app)
+CORS(app)
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(100), unique=True, nullable=False)
+
+@app.before_request
+def validate_content_type():
+    if request.method in ['POST', 'PUT']:
+        if not request.is_json:
+            return {'error': 'Content-Type must be application/json'}, 400
+
+@app.route('/api/users', methods=['GET'])
+def list_users():
+    page = request.args.get('page', 1, type=int)
+    limit = request.args.get('limit', 10, type=int)
+
+    users = User.query.paginate(page=page, per_page=limit)
+    return jsonify({
+        'total': users.total,
+        'users': [{
+            'id': u.id,
+            'name': u.name,
+            'email': u.email
+        } for u in users.items]
+    })
+
+@app.route('/api/users/<int:user_id>', methods=['GET'])
+def get_user(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return {'error': 'User not found'}, 404
+
+    return {
+        'id': user.id,
+        'name': user.name,
+        'email': user.email
+    }
+
+@app.route('/api/users', methods=['POST'])
+def create_user():
+    data = request.json
+
+    # Manual validation
+    if not data.get('name'):
+        return {'error': 'Name required'}, 400
+    if not data.get('email'):
+        return {'error': 'Email required'}, 400
+
+    # Check duplicate
+    if User.query.filter_by(email=data['email']).first():
+        return {'error': 'Email already exists'}, 409
+
+    user = User(name=data['name'], email=data['email'])
+    db.session.add(user)
+    db.session.commit()
+
+    return {'id': user.id, 'name': user.name, 'email': user.email}, 201
+
+@app.errorhandler(Exception)
+def handle_error(e):
+    return {'error': str(e)}, 500
+
+if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
+    app.run(debug=True)
+                </code></pre></div>
+            </div>
+
+            <!-- FastAPI Example -->
+            <div id="prod-fastapi" class="tab-content">
+                <h3>FastAPI User API (Same Functionality):</h3>
+
+                <div class="code-block"><pre><code>
+from fastapi import FastAPI, HTTPException, Query
+from sqlalchemy import create_engine, Column, Integer, String
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker, Session
+from pydantic import BaseModel, EmailStr
+from fastapi.middleware.cors import CORSMiddleware
+
+DATABASE_URL = "sqlite:///./app.db"
+engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(bind=engine)
+Base = declarative_base()
+
+class UserDB(Base):
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True)
+    name = Column(String(100), nullable=False)
+    email = Column(String(100), unique=True, nullable=False)
+
+Base.metadata.create_all(engine)
+
+class User(BaseModel):
+    id: int
+    name: str
+    email: EmailStr
+
+class UserCreate(BaseModel):
+    name: str
+    email: EmailStr
+
+app = FastAPI(title="User API")
+
+# CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+@app.get('/api/users', response_model=dict)
+async def list_users(
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1, le=100),
+    db: Session = Depends(get_db)
+):
+    query = db.query(UserDB)
+    total = query.count()
+
+    users = query.offset((page - 1) * limit).limit(limit).all()
+
+    return {
+        'total': total,
+        'users': [
+            {'id': u.id, 'name': u.name, 'email': u.email}
+            for u in users
+        ]
+    }
+
+@app.get('/api/users/{user_id}', response_model=User)
+async def get_user(user_id: int, db: Session = Depends(get_db)):
+    user = db.query(UserDB).filter(UserDB.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
+
+@app.post('/api/users', response_model=User, status_code=201)
+async def create_user(user: UserCreate, db: Session = Depends(get_db)):
+    # Validation automatic! ✅
+    # Email format checked! ✅
+
+    db_user = db.query(UserDB).filter(UserDB.email == user.email).first()
+    if db_user:
+        raise HTTPException(status_code=409, detail="Email already exists")
+
+    db_user = UserDB(name=user.name, email=user.email)
+    db.session.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+
+    return db_user
+
+# Auto-generated API docs at /docs! 📚
+# Auto error handling! ✅
+                </code></pre></div>
+
+                <div class="highlight">
+                    <strong>FastAPI Advantages Here:</strong><br>
+                    ✅ Pydantic auto-validates email format<br>
+                    ✅ Query parameters auto-validated (ge=1, le=100)<br>
+                    ✅ Response model auto-validated<br>
+                    ✅ Status codes auto-documented<br>
+                    ✅ Interactive docs at /docs<br>
+                    ✅ Less boilerplate code
+                </div>
+            </div>
+        </section>
+
+        <!-- Demo Section -->
+        <section id="demo" class="card">
+            <h2>🎮 Interactive Demo</h2>
+
+            <div style="background: rgba(51, 65, 85, 0.5); border: 2px solid var(--border); border-radius: 8px; padding: 2rem; margin: 1.5rem 0;">
+                <h3 style="color: var(--primary); margin-bottom: 1rem;">Run Simulations:</h3>
+
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+                    <button onclick="demoFlaskSync()">Flask Sync</button>
+                    <button onclick="demoFastAPIAsync()">FastAPI Async</button>
+                    <button onclick="comparePerformance()">Compare</button>
+                    <button onclick="clearDemoOutput()">🗑️ Clear</button>
+                </div>
+
+                <div class="output" id="demoOutput">Click a button to run demo...</div>
+            </div>
+        </section>
+
+        <!-- Key Takeaways -->
+        <section class="card">
+            <h2>📝 Decision Guide</h2>
+
+            <div class="key-points">
+                <h3>Choose Flask if:</h3>
+                <ul>
+                    <li>Building traditional web apps with templates</li>
+                    <li>Need mature, battle-tested ecosystem</li>
+                    <li>Team is comfortable with WSGI/synchronous code</li>
+                    <li>Project traffic is < 5,000 requests/second</li>
+                    <li>Want maximum flexibility & minimal opinions</li>
+                </ul>
+            </div>
+
+            <div class="key-points">
+                <h3>Choose FastAPI if:</h3>
+                <ul>
+                    <li>Building modern REST APIs or microservices</li>
+                    <li>Need high concurrency (10,000+ req/s)</li>
+                    <li>Want automatic validation & API docs</li>
+                    <li>Using async/await patterns</li>
+                    <li>Building real-time features (WebSockets)</li>
+                    <li>Team knows/wants type hints</li>
+                </ul>
+            </div>
+
+            <div class="key-points">
+                <h3>Technical Comparison Summary:</h3>
+                <ul>
+                    <li><strong>Protocol:</strong> Flask=WSGI (sync), FastAPI=ASGI (async)</li>
+                    <li><strong>Performance:</strong> FastAPI 6-10x faster for I/O-bound work</li>
+                    <li><strong>Validation:</strong> Flask=manual, FastAPI=automatic</li>
+                    <li><strong>Documentation:</strong> Flask=manual, FastAPI=auto-generated</li>
+                    <li><strong>Learning:</strong> Flask=easier, FastAPI=modern patterns</li>
+                    <li><strong>Maturity:</strong> Flask=proven, FastAPI=rapidly growing</li>
+                </ul>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <p>🚀 Flask vs FastAPI Educational Hub | Choose Your Perfect Framework</p>
+        <p style="margin-top: 1rem; color: var(--text-secondary); font-size: 0.9rem;">
+            Understanding WSGI vs ASGI, validation, async patterns → Expert web development 💡
+        </p>
+    </footer>
+
+    <script>
+        function switchTab(event, tabName) {
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(c => c.classList.remove('active'));
+
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(b => b.classList.remove('active'));
+
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function scrollTo(id) {
+            const element = document.getElementById(id);
+            element.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function addOutput(text, style = 'normal') {
+            const output = document.getElementById('demoOutput');
+            const line = document.createElement('div');
+
+            if (style === 'info') line.style.color = 'var(--primary)';
+            else if (style === 'success') line.style.color = 'var(--success)';
+
+            line.textContent = text;
+            output.appendChild(line);
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function clearDemoOutput() {
+            document.getElementById('demoOutput').innerHTML = '';
+        }
+
+        function demoFlaskSync() {
+            clearDemoOutput();
+            addOutput('📊 Flask Synchronous Request Simulation', 'info');
+            addOutput('', 'normal');
+            addOutput('Configuration:', 'info');
+            addOutput('  Workers: 4', 'normal');
+            addOutput('  Memory per worker: 50MB', 'normal');
+            addOutput('  Total memory: 200MB', 'normal');
+            addOutput('', 'normal');
+
+            let completed = 0;
+            const interval = setInterval(() => {
+                completed += 10;
+                addOutput(`  Processing... ${completed}%`, 'normal');
+
+                if (completed >= 100) {
+                    clearInterval(interval);
+                    addOutput('', 'normal');
+                    addOutput('✅ Results:', 'success');
+                    addOutput('  Requests handled: 3,000/sec', 'normal');
+                    addOutput('  Avg latency: 333ms', 'normal');
+                    addOutput('  Max concurrent: 400 (4 workers × 100 threads)', 'normal');
+                }
+            }, 100);
+        }
+
+        function demoFastAPIAsync() {
+            clearDemoOutput();
+            addOutput('⚡ FastAPI Asynchronous Request Simulation', 'info');
+            addOutput('', 'normal');
+            addOutput('Configuration:', 'info');
+            addOutput('  Workers: 1', 'normal');
+            addOutput('  Memory: 80MB', 'normal');
+            addOutput('  Event loop: async/await', 'normal');
+            addOutput('', 'normal');
+
+            let completed = 0;
+            const interval = setInterval(() => {
+                completed += 25;
+                addOutput(`  Processing... ${completed}%`, 'normal');
+
+                if (completed >= 100) {
+                    clearInterval(interval);
+                    addOutput('', 'normal');
+                    addOutput('✅ Results:', 'success');
+                    addOutput('  Requests handled: 20,000/sec', 'normal');
+                    addOutput('  Avg latency: 50ms', 'normal');
+                    addOutput('  Max concurrent: 20,000+ (event loop based)', 'normal');
+                    addOutput('  Memory saved: 60% less (80MB vs 200MB)', 'normal');
+                }
+            }, 50);
+        }
+
+        function comparePerformance() {
+            clearDemoOutput();
+            addOutput('📈 Performance Comparison', 'info');
+            addOutput('', 'normal');
+
+            setTimeout(() => {
+                addOutput('Flask (WSGI):', 'info');
+                addOutput('  ████████░░░░░░░░░░░░ 3,000 req/s', 'normal');
+                addOutput('  Memory: 200MB (4 workers)', 'normal');
+                addOutput('', 'normal');
+            }, 200);
+
+            setTimeout(() => {
+                addOutput('FastAPI (ASGI):', 'info');
+                addOutput('  ████████████████████ 20,000 req/s', 'normal');
+                addOutput('  Memory: 80MB (1 worker)', 'normal');
+                addOutput('', 'normal');
+            }, 600);
+
+            setTimeout(() => {
+                addOutput('🎯 Difference:', 'success');
+                addOutput('  FastAPI is 6.6x faster', 'normal');
+                addOutput('  FastAPI uses 60% less memory', 'normal');
+                addOutput('  For I/O-bound work (APIs)', 'normal');
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
